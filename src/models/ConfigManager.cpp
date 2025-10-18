@@ -80,3 +80,22 @@ QMap<QString, QString> ConfigManager::readConfigFile() {
 
     return settings;
 }
+
+void ConfigManager::saveConfigFile(const QMap<QString, QString> &settings) {
+    if (m_configFilePath.isEmpty()) {
+        qWarning() << "Config file path is not set. Cannot save.";
+        return;
+    }
+
+    QFile configFile(m_configFilePath);
+    if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning() << "Could not open config file for writing:" << m_configFilePath;
+        return;
+    }
+
+    // WARNING: This implementation overwrites the entire file and loses all comments.
+    QTextStream out(&configFile);
+    for (auto it = settings.constBegin(); it != settings.constEnd(); ++it) {
+        out << it.key() << "=" << it.value() << "\n";
+    }
+}

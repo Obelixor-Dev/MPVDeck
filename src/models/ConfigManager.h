@@ -10,6 +10,7 @@ public:
 
     QString findConfigFile();
     QMap<QString, QString> readConfigFile();
+    void saveConfigFile(const QMap<QString, QString> &settings);
 
 private:
     QString m_configFilePath;

@@ -3,8 +3,12 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QHeaderView>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include "viewmodels/SettingsViewModel.h"
+#include "models/ConfigManager.h"
 #include <iostream>
+#include <QDebug>
 
 // Custom message handler to redirect Qt logs to the console
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
@@ -56,11 +60,33 @@ int main(int argc, char *argv[]) {
     auto *tableView = new QTableView(&mainWindow);
     tableView->setModel(model);
     tableView->horizontalHeader()->setStretchLastSection(true);
-    tableView->setEditTriggers(QAbstractItemView::NoEditTriggers); // Read-only for now
     tableView->setSortingEnabled(true);
     tableView->sortByColumn(0, Qt::AscendingOrder);
 
-    mainWindow.setCentralWidget(tableView);
+    auto *saveButton = new QPushButton("Save", &mainWindow);
+
+    QObject::connect(saveButton, &QPushButton::clicked, [model]() {
+        qDebug() << "Save button clicked. Saving settings...";
+        QMap<QString, QString> newSettings;
+        for (int row = 0; row < model->rowCount(); ++row) {
+            QString key = model->item(row, 0)->text();
+            QString value = model->item(row, 1)->text();
+            if (!key.isEmpty()) {
+                newSettings[key] = value;
+            }
+        }
+
+        ConfigManager configManager;
+        configManager.saveConfigFile(newSettings);
+        qDebug() << "Settings saved.";
+    });
+
+    auto *centralWidget = new QWidget(&mainWindow);
+    auto *layout = new QVBoxLayout(centralWidget);
+    layout->addWidget(tableView);
+    layout->addWidget(saveButton);
+
+    mainWindow.setCentralWidget(centralWidget);
     mainWindow.resize(800, 600);
     mainWindow.show();
 
