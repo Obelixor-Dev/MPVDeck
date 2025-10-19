@@ -433,3 +433,17 @@ QMap<QString, QString> SettingsViewModel::parseOptionDescriptions() {
 
   return optionDescriptions;
 }
+
+QString SettingsViewModel::getRawConfig() {
+    return m_configManager->getRawConfig();
+}
+
+void SettingsViewModel::applyRawConfig(const QString &configText) {
+    m_configManager->parseRawConfig(configText);
+    loadSettings(); // Reload settings from the (now updated) config manager
+}
+
+QString SettingsViewModel::getOptionDescription(const QString &optionName) {
+    static QMap<QString, QString> descriptions = parseOptionDescriptions();
+    return descriptions.value(optionName, "MPV configuration option");
+}

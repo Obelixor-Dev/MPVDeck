@@ -87,7 +87,7 @@ auto ConfigManager::parseLine(const QString& line) -> ConfigLine {
     return configLine;
 }
 
-auto ConfigManager::serializeLine(const ConfigLine& line) -> QString {
+auto ConfigManager::serializeLine(const ConfigLine& line) const -> QString {
     switch (line.type) {
         case EmptyLine:
         case Comment:
@@ -184,4 +184,20 @@ auto ConfigManager::getSettingsMap() const -> QMap<QString, QString> {
         }
     }
     return settingsMap;
+}
+
+QString ConfigManager::getRawConfig() const {
+    QStringList rawLines;
+    for (const ConfigLine& line : m_configLines) {
+        rawLines.append(serializeLine(line));
+    }
+    return rawLines.join("\n");
+}
+
+void ConfigManager::parseRawConfig(const QString &configText) {
+    m_configLines.clear();
+    QStringList lines = configText.split('\n');
+    for (const QString& line : lines) {
+        m_configLines.append(parseLine(line));
+    }
 }

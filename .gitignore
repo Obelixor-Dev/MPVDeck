@@ -1,5 +1,5 @@
-
 # Build and IDE related files
+GEMINI.md
 .idea/
 build/
 cmake-build-clang-tidy/

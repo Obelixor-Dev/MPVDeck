@@ -27,6 +27,8 @@ public:
   auto readConfigFile() -> QList<ConfigLine>; // Returns the parsed file structure
   auto saveConfigFile(const QMap<QString, QString> &newSettings) -> bool; // Updates and saves the file
   auto getSettingsMap() const -> QMap<QString, QString>; // Returns current settings as a map
+  QString getRawConfig() const;
+  void parseRawConfig(const QString &configText);
 
 private:
   QString m_configFilePath;
@@ -35,7 +37,7 @@ private:
   // Helper to parse a single line
   auto parseLine(const QString& line) -> ConfigLine;
   // Helper to serialize a ConfigLine back to a string
-  auto serializeLine(const ConfigLine& line) -> QString;
+  auto serializeLine(const ConfigLine& line) const -> QString;
 };
 
 #endif // MPVDECK_CONFIGMANAGER_H

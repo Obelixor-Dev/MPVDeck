@@ -2,6 +2,8 @@
 #define MPVDECK_SETTINGSVIEW_H
 
 #include <QMainWindow>
+#include <QPlainTextEdit>
+#include <QLineEdit>
 
 class SettingsViewModel;
 class QTabWidget;
@@ -27,15 +29,24 @@ private slots:
   void onLoadDefaultsButtonClicked();
 
 private:
+  QMenu *m_fileMenu;
+  void setupMenuBar();
+
   QWidget *createAudioTab();
   QWidget *createVideoTab();
   QWidget *createSubtitlesTab();
   QWidget *createPlaybackTab();
   QWidget *createPerformanceTab();
   QWidget *createInterfaceTab();
+  QWidget *createRawConfigTab();
+  void refreshRawEditor(QPlainTextEdit *textEdit);
+  void applyRawConfig(const QString &configText);
 
   SettingsViewModel *m_viewModel;
   QTabWidget *m_tabWidget;
+  QLineEdit *m_searchEdit;
+
+  void filterTabs(const QString &searchText);
 };
 
 #endif // MPVDECK_SETTINGSVIEW_H

@@ -34,6 +34,9 @@ public:
   void loadDefaults();
   QMap<QString, QString> parseDefaultSettings();
   QMap<QString, QString> parseOptionDescriptions();
+  QString getRawConfig();
+  void applyRawConfig(const QString &configText);
+  QString getOptionDescription(const QString &optionName);
 
   [[nodiscard]] auto settings() const -> QMap<QString, QString>;
   [[nodiscard]] auto audioViewModel() const
