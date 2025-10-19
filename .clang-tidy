@@ -1,0 +1,11 @@
+Checks: >
+  -*,
+  clang-analyzer-*,
+  modernize-*,
+  readability-*,
+  performance-*,
+  bugprone-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-owning-memory
+WarningsAsErrors: ""
+HeaderFilterRegex: ""

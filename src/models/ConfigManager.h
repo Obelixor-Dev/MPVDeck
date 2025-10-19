@@ -1,19 +1,14 @@
 #ifndef MPVDECK_CONFIGMANAGER_H
 #define MPVDECK_CONFIGMANAGER_H
 
-#include <QString>
 #include <QMap>
+#include <QString>
 
 class ConfigManager {
 public:
-    ConfigManager();
-
-    QString findConfigFile();
-    QMap<QString, QString> readConfigFile();
-    void saveConfigFile(const QMap<QString, QString> &settings);
-
-private:
-    QString m_configFilePath;
+  static auto findConfigFile() -> QString;
+  static auto readConfigFile() -> QMap<QString, QString>;
+  static auto saveConfigFile(const QMap<QString, QString> &settings) -> bool;
 };
 
-#endif //MPVDECK_CONFIGMANAGER_H
+#endif // MPVDECK_CONFIGMANAGER_H
