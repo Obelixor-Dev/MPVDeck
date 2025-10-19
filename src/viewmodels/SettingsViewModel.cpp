@@ -1,573 +1,435 @@
 #include "SettingsViewModel.h"
 #include "../models/ConfigManager.h"
+#include "AudioViewModel.h"        // Include the new AudioViewModel header
+#include "InterfaceOsdViewModel.h" // Include the new InterfaceOsdViewModel header
+#include "PerformanceCachingViewModel.h" // Include the new PerformanceCachingViewModel header
+#include "PlaybackBehaviorViewModel.h" // Include the new PlaybackBehaviorViewModel header
+#include "SubtitleViewModel.h" // Include the new SubtitleViewModel header
+#include "VideoViewModel.h"    // Include the new VideoViewModel header
+#include <QDebug>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QTextStream>
 
-SettingsViewModel::SettingsViewModel(QObject *parent) : QObject(parent) {}
+SettingsViewModel::SettingsViewModel(ConfigManager *configManager,
+                                     QObject *parent)
+    : QObject(parent), m_configManager(configManager),
+      m_audioViewModel(new AudioViewModel(this)), // Initialize AudioViewModel
+      m_videoViewModel(new VideoViewModel(this)), // Initialize VideoViewModel
+      m_subtitleViewModel(
+          new SubtitleViewModel(this)), // Initialize SubtitleViewModel
+      m_playbackBehaviorViewModel(new PlaybackBehaviorViewModel(
+          this)), // Initialize PlaybackBehaviorViewModel
+      m_performanceCachingViewModel(new PerformanceCachingViewModel(
+          this)), // Initialize PerformanceCachingViewModel
+      m_interfaceOsdViewModel(
+          new InterfaceOsdViewModel(this)) // Initialize InterfaceOsdViewModel
+{}
+
+auto SettingsViewModel::audioViewModel() const -> AudioViewModel * {
+  return m_audioViewModel;
+}
+
+auto SettingsViewModel::videoViewModel() const -> VideoViewModel * {
+  return m_videoViewModel;
+}
+
+auto SettingsViewModel::subtitleViewModel() const -> SubtitleViewModel * {
+  return m_subtitleViewModel;
+}
+
+auto SettingsViewModel::playbackBehaviorViewModel() const
+    -> PlaybackBehaviorViewModel * {
+  return m_playbackBehaviorViewModel;
+}
+
+auto SettingsViewModel::performanceCachingViewModel() const
+    -> PerformanceCachingViewModel * {
+  return m_performanceCachingViewModel;
+}
+
+auto SettingsViewModel::interfaceOsdViewModel() const
+    -> InterfaceOsdViewModel * {
+  return m_interfaceOsdViewModel;
+}
 
 void SettingsViewModel::loadSettings() {
-  m_settings = ConfigManager::readConfigFile(); // Call static method
+  m_configManager->readConfigFile(); // Populate m_configLines in ConfigManager
+  m_settings = m_configManager->getSettingsMap();
 
   // Audio
   if (m_settings.contains("mute")) {
-    setMute(m_settings.value("mute") == "yes");
+    m_audioViewModel->setMute(m_settings.value("mute") == "yes");
   }
   if (m_settings.contains("volume")) {
-    setVolume(m_settings.value("volume").toInt());
+    m_audioViewModel->setVolume(m_settings.value("volume").toInt());
   }
   if (m_settings.contains("audio-device")) {
-    setAudioDevice(m_settings.value("audio-device"));
+    m_audioViewModel->setAudioDevice(m_settings.value("audio-device"));
   }
   if (m_settings.contains("audio-channels")) {
-    setAudioChannels(m_settings.value("audio-channels"));
+    m_audioViewModel->setAudioChannels(m_settings.value("audio-channels"));
   }
   if (m_settings.contains("audio-delay")) {
-    setAudioDelay(m_settings.value("audio-delay").toDouble());
+    m_audioViewModel->setAudioDelay(m_settings.value("audio-delay").toDouble());
   }
   if (m_settings.contains("audio-normalize-downmix")) {
-    setAudioNormalizeDownmix(m_settings.value("audio-normalize-downmix") == "yes");
+    m_audioViewModel->setAudioNormalizeDownmix(
+        m_settings.value("audio-normalize-downmix") == "yes");
   }
 
   // Video
   if (m_settings.contains("profile")) {
-    setVideoProfile(m_settings.value("profile"));
+    m_videoViewModel->setVideoProfile(m_settings.value("profile"));
   }
   if (m_settings.contains("scale")) {
-    setVideoScale(m_settings.value("scale"));
+    m_videoViewModel->setVideoScale(m_settings.value("scale"));
   }
   if (m_settings.contains("cscale")) {
-    setVideoCscale(m_settings.value("cscale"));
+    m_videoViewModel->setVideoCscale(m_settings.value("cscale"));
   }
   if (m_settings.contains("dscale")) {
-    setVideoDscale(m_settings.value("dscale"));
+    m_videoViewModel->setVideoDscale(m_settings.value("dscale"));
   }
   if (m_settings.contains("interpolation")) {
-    setVideoInterpolation(m_settings.value("interpolation") == "yes");
+    m_videoViewModel->setVideoInterpolation(m_settings.value("interpolation") ==
+                                            "yes");
   }
   if (m_settings.contains("tscale")) {
-    setVideoTscale(m_settings.value("tscale"));
+    m_videoViewModel->setVideoTscale(m_settings.value("tscale"));
   }
   if (m_settings.contains("video-sync")) {
-    setVideoVideoSync(m_settings.value("video-sync"));
+    m_videoViewModel->setVideoVideoSync(m_settings.value("video-sync"));
   }
   if (m_settings.contains("deband")) {
-    setVideoDeband(m_settings.value("deband") == "yes");
+    m_videoViewModel->setVideoDeband(m_settings.value("deband") == "yes");
   }
   if (m_settings.contains("vo")) {
-    setVideoVo(m_settings.value("vo"));
+    m_videoViewModel->setVideoVo(m_settings.value("vo"));
   }
 
   // Subtitles
   if (m_settings.contains("sub-visibility")) {
-    setSubtitleVisibility(m_settings.value("sub-visibility") == "yes");
+    m_subtitleViewModel->setSubtitleVisibility(
+        m_settings.value("sub-visibility") == "yes");
   }
   if (m_settings.contains("sub-font-size")) {
-    setSubtitleFontSize(m_settings.value("sub-font-size").toInt());
+    m_subtitleViewModel->setSubtitleFontSize(
+        m_settings.value("sub-font-size").toInt());
   }
   if (m_settings.contains("sub-color")) {
-    setSubtitleColor(m_settings.value("sub-color"));
+    m_subtitleViewModel->setSubtitleColor(m_settings.value("sub-color"));
   }
   if (m_settings.contains("slang")) {
-    setSubtitleLanguages(m_settings.value("slang"));
+    m_subtitleViewModel->setSubtitleLanguages(m_settings.value("slang"));
   }
 
   // Subtitles
   if (m_settings.contains("sub-auto")) {
-    setSubAuto(m_settings.value("sub-auto"));
+    m_subtitleViewModel->setSubAuto(m_settings.value("sub-auto"));
   }
   if (m_settings.contains("sid")) {
-    setSid(m_settings.value("sid"));
+    m_subtitleViewModel->setSid(m_settings.value("sid"));
   }
   if (m_settings.contains("sub-forced-only")) {
-    setSubForcedOnly(m_settings.value("sub-forced-only") == "yes");
+    m_subtitleViewModel->setSubForcedOnly(m_settings.value("sub-forced-only") ==
+                                          "yes");
   }
   if (m_settings.contains("sub-font")) {
-    setSubFont(m_settings.value("sub-font"));
+    m_subtitleViewModel->setSubFont(m_settings.value("sub-font"));
   }
 
   // Playback & Behavior
   if (m_settings.contains("resume-playback")) {
-    setResumePlayback(m_settings.value("resume-playback") == "yes");
+    m_playbackBehaviorViewModel->setResumePlayback(
+        m_settings.value("resume-playback") == "yes");
   }
   if (m_settings.contains("save-position-on-quit")) {
-    setSavePositionOnQuit(m_settings.value("save-position-on-quit") == "yes");
+    m_playbackBehaviorViewModel->setSavePositionOnQuit(
+        m_settings.value("save-position-on-quit") == "yes");
   }
   if (m_settings.contains("loop-file")) {
-    setLoopFile(m_settings.value("loop-file"));
+    m_playbackBehaviorViewModel->setLoopFile(m_settings.value("loop-file"));
   }
   if (m_settings.contains("keep-open")) {
-    setKeepOpen(m_settings.value("keep-open"));
+    m_playbackBehaviorViewModel->setKeepOpen(m_settings.value("keep-open"));
   }
   if (m_settings.contains("autofit-larger")) {
-    setAutofitLarger(m_settings.value("autofit-larger"));
+    m_playbackBehaviorViewModel->setAutofitLarger(
+        m_settings.value("autofit-larger"));
   }
   if (m_settings.contains("ytdl-raw-options")) {
-    setYtdlRawOptions(m_settings.value("ytdl-raw-options"));
+    m_playbackBehaviorViewModel->setYtdlRawOptions(
+        m_settings.value("ytdl-raw-options"));
   }
 
   // Performance / Caching
   if (m_settings.contains("cache")) {
-    setCache(m_settings.value("cache") == "yes");
+    m_performanceCachingViewModel->setCache(m_settings.value("cache") == "yes");
   }
   if (m_settings.contains("cache-secs")) {
-    setCacheSecs(m_settings.value("cache-secs").toInt());
+    m_performanceCachingViewModel->setCacheSecs(
+        m_settings.value("cache-secs").toInt());
   }
   if (m_settings.contains("demuxer-max-bytes")) {
-    setDemuxerMaxBytes(m_settings.value("demuxer-max-bytes"));
+    m_performanceCachingViewModel->setDemuxerMaxBytes(
+        m_settings.value("demuxer-max-bytes"));
   }
   if (m_settings.contains("hwdec")) {
-    setHwdec(m_settings.value("hwdec"));
+    m_performanceCachingViewModel->setHwdec(m_settings.value("hwdec"));
   }
   if (m_settings.contains("hwdec-codecs")) {
-    setHwdecCodecs(m_settings.value("hwdec-codecs"));
+    m_performanceCachingViewModel->setHwdecCodecs(
+        m_settings.value("hwdec-codecs"));
   }
 
   // Interface / OSD
   if (m_settings.contains("osd-level")) {
-    setOsdLevel(m_settings.value("osd-level").toInt());
+    m_interfaceOsdViewModel->setOsdLevel(m_settings.value("osd-level").toInt());
   }
   if (m_settings.contains("osd-font-size")) {
-    setOsdFontSize(m_settings.value("osd-font-size").toInt());
+    m_interfaceOsdViewModel->setOsdFontSize(
+        m_settings.value("osd-font-size").toInt());
   }
   if (m_settings.contains("osd-duration")) {
-    setOsdDuration(m_settings.value("osd-duration").toInt());
+    m_interfaceOsdViewModel->setOsdDuration(
+        m_settings.value("osd-duration").toInt());
   }
   if (m_settings.contains("osc")) {
-    setOsc(m_settings.value("osc") == "yes");
+    m_interfaceOsdViewModel->setOsc(m_settings.value("osc") == "yes");
   }
   if (m_settings.contains("screenshot-format")) {
-    setScreenshotFormat(m_settings.value("screenshot-format"));
+    m_interfaceOsdViewModel->setScreenshotFormat(
+        m_settings.value("screenshot-format"));
   }
   if (m_settings.contains("screenshot-directory")) {
-    setScreenshotDirectory(m_settings.value("screenshot-directory"));
+    m_interfaceOsdViewModel->setScreenshotDirectory(
+        m_settings.value("screenshot-directory"));
   }
   if (m_settings.contains("screenshot-template")) {
-    setScreenshotTemplate(m_settings.value("screenshot-template"));
+    m_interfaceOsdViewModel->setScreenshotTemplate(
+        m_settings.value("screenshot-template"));
   }
 }
 
 void SettingsViewModel::saveSettings() {
   // Audio
-  m_settings["mute"] = m_mute ? "yes" : "no";
-  m_settings["volume"] = QString::number(m_volume);
-  m_settings["audio-device"] = m_audioDevice;
-  m_settings["audio-channels"] = m_audioChannels;
-  m_settings["audio-delay"] = QString::number(m_audioDelay);
-  m_settings["audio-normalize-downmix"] = m_audioNormalizeDownmix ? "yes" : "no";
+  m_settings["mute"] = m_audioViewModel->mute() ? "yes" : "no";
+  m_settings["volume"] = QString::number(m_audioViewModel->volume());
+  m_settings["audio-device"] = m_audioViewModel->audioDevice();
+  m_settings["audio-channels"] = m_audioViewModel->audioChannels();
+  m_settings["audio-delay"] = QString::number(m_audioViewModel->audioDelay());
+  m_settings["audio-normalize-downmix"] =
+      m_audioViewModel->audioNormalizeDownmix() ? "yes" : "no";
 
   // Video
-  m_settings["profile"] = m_videoProfile;
-  m_settings["scale"] = m_videoScale;
-  m_settings["cscale"] = m_videoCscale;
-  m_settings["dscale"] = m_videoDscale;
-  m_settings["interpolation"] = m_videoInterpolation ? "yes" : "no";
-  m_settings["tscale"] = m_videoTscale;
-  m_settings["video-sync"] = m_videoVideoSync;
-  m_settings["deband"] = m_videoDeband ? "yes" : "no";
-  m_settings["vo"] = m_videoVo;
+  m_settings["profile"] = m_videoViewModel->videoProfile();
+  m_settings["scale"] = m_videoViewModel->videoScale();
+  m_settings["cscale"] = m_videoViewModel->videoCscale();
+  m_settings["dscale"] = m_videoViewModel->videoDscale();
+  m_settings["interpolation"] =
+      m_videoViewModel->videoInterpolation() ? "yes" : "no";
+  m_settings["tscale"] = m_videoViewModel->videoTscale();
+  m_settings["video-sync"] = m_videoViewModel->videoVideoSync();
+  m_settings["deband"] = m_videoViewModel->videoDeband() ? "yes" : "no";
+  m_settings["vo"] = m_videoViewModel->videoVo();
 
   // Subtitles
-  m_settings["sub-visibility"] = m_subtitleVisibility ? "yes" : "no";
-  m_settings["sub-font-size"] = QString::number(m_subtitleFontSize);
-  m_settings["sub-color"] = m_subtitleColor;
-  m_settings["slang"] = m_subtitleLanguages;
+  m_settings["sub-visibility"] =
+      m_subtitleViewModel->subtitleVisibility() ? "yes" : "no";
+  m_settings["sub-font-size"] =
+      QString::number(m_subtitleViewModel->subtitleFontSize());
+  m_settings["sub-color"] = m_subtitleViewModel->subtitleColor();
+  m_settings["slang"] = m_subtitleViewModel->subtitleLanguages();
 
   // Subtitles
-  m_settings["sub-auto"] = m_subAuto;
-  m_settings["sid"] = m_sid;
-  m_settings["sub-forced-only"] = m_subForcedOnly ? "yes" : "no";
-  m_settings["sub-font"] = m_subFont;
+  m_settings["sub-auto"] = m_subtitleViewModel->subAuto();
+  m_settings["sid"] = m_subtitleViewModel->sid();
+  m_settings["sub-forced-only"] =
+      m_subtitleViewModel->subForcedOnly() ? "yes" : "no";
+  m_settings["sub-font"] = m_subtitleViewModel->subFont();
 
   // Playback & Behavior
-  m_settings["resume-playback"] = m_resumePlayback ? "yes" : "no";
-  m_settings["save-position-on-quit"] = m_savePositionOnQuit ? "yes" : "no";
-  m_settings["loop-file"] = m_loopFile;
-  m_settings["keep-open"] = m_keepOpen;
-  m_settings["autofit-larger"] = m_autofitLarger;
-  m_settings["ytdl-raw-options"] = m_ytdlRawOptions;
+  m_settings["resume-playback"] =
+      m_playbackBehaviorViewModel->resumePlayback() ? "yes" : "no";
+  m_settings["save-position-on-quit"] =
+      m_playbackBehaviorViewModel->savePositionOnQuit() ? "yes" : "no";
+  m_settings["loop-file"] = m_playbackBehaviorViewModel->loopFile();
+  m_settings["keep-open"] = m_playbackBehaviorViewModel->keepOpen();
+  m_settings["autofit-larger"] = m_playbackBehaviorViewModel->autofitLarger();
+  m_settings["ytdl-raw-options"] =
+      m_playbackBehaviorViewModel->ytdlRawOptions();
 
-  bool success = ConfigManager::saveConfigFile(m_settings);
+  // Performance / Caching
+  m_settings["cache"] = m_performanceCachingViewModel->cache() ? "yes" : "no";
+  m_settings["cache-secs"] =
+      QString::number(m_performanceCachingViewModel->cacheSecs());
+  m_settings["demuxer-max-bytes"] =
+      m_performanceCachingViewModel->demuxerMaxBytes();
+  m_settings["hwdec"] = m_performanceCachingViewModel->hwdec();
+  // Interface / OSD
+  m_settings["osd-level"] =
+      QString::number(m_interfaceOsdViewModel->osdLevel());
+  m_settings["osd-font-size"] =
+      QString::number(m_interfaceOsdViewModel->osdFontSize());
+  m_settings["osd-duration"] =
+      QString::number(m_interfaceOsdViewModel->osdDuration());
+  m_settings["osc"] = m_interfaceOsdViewModel->osc() ? "yes" : "no";
+  m_settings["screenshot-format"] = m_interfaceOsdViewModel->screenshotFormat();
+  m_settings["screenshot-directory"] =
+      m_interfaceOsdViewModel->screenshotDirectory();
+  m_settings["screenshot-template"] =
+      m_interfaceOsdViewModel->screenshotTemplate();
+
+  bool success = m_configManager->saveConfigFile(m_settings);
   emit settingsSaved(success);
 }
 
-auto SettingsViewModel::settings() const -> QMap<QString, QString> {
-  return m_settings;
+void SettingsViewModel::loadDefaults() {
+  QMap<QString, QString> defaultSettings = parseDefaultSettings();
+
+  m_audioViewModel->setMute(defaultSettings.value("mute", "no") == "yes");
+  m_audioViewModel->setVolume(defaultSettings.value("volume", "100").toInt());
+  m_audioViewModel->setAudioDevice(
+      defaultSettings.value("audio-device", "auto"));
+  m_audioViewModel->setAudioChannels(
+      defaultSettings.value("audio-channels", "stereo"));
+  m_audioViewModel->setAudioDelay(
+      defaultSettings.value("audio-delay", "0.0").toDouble());
+  m_audioViewModel->setAudioNormalizeDownmix(
+      defaultSettings.value("audio-normalize-downmix", "yes") == "yes");
+
+  m_videoViewModel->setVideoProfile(defaultSettings.value("profile", "gpu-hq"));
+  m_videoViewModel->setVideoScale(
+      defaultSettings.value("scale", "ewa_lanczossharp"));
+  m_videoViewModel->setVideoCscale(
+      defaultSettings.value("cscale", "ewa_lanczossharp"));
+  m_videoViewModel->setVideoDscale(defaultSettings.value("dscale", "mitchell"));
+  m_videoViewModel->setVideoInterpolation(
+      defaultSettings.value("interpolation", "no") == "yes");
+  m_videoViewModel->setVideoTscale(
+      defaultSettings.value("tscale", "oversample"));
+  m_videoViewModel->setVideoVideoSync(
+      defaultSettings.value("video-sync", "display-resample"));
+  m_videoViewModel->setVideoDeband(defaultSettings.value("deband", "no") ==
+                                   "yes");
+  m_videoViewModel->setVideoVo(defaultSettings.value("vo", "gpu"));
+
+  m_subtitleViewModel->setSubtitleVisibility(
+      defaultSettings.value("no-sub", "no") == "no");
+  m_subtitleViewModel->setSubAuto(defaultSettings.value("sub-auto", "fuzzy"));
+  m_subtitleViewModel->setSid(defaultSettings.value("sid", "0"));
+  m_subtitleViewModel->setSubtitleLanguages(defaultSettings.value("slang", ""));
+  m_subtitleViewModel->setSubForcedOnly(
+      defaultSettings.value("sub-forced-only", "no") == "yes");
+  m_subtitleViewModel->setSubFont(defaultSettings.value("sub-font", "Sans"));
+  m_subtitleViewModel->setSubtitleFontSize(
+      defaultSettings.value("sub-font-size", "36").toInt());
+  m_subtitleViewModel->setSubtitleColor(
+      defaultSettings.value("sub-color", "#FFFFFF"));
+
+  m_playbackBehaviorViewModel->setResumePlayback(
+      defaultSettings.value("resume-playback", "no") == "yes");
+  m_playbackBehaviorViewModel->setSavePositionOnQuit(
+      defaultSettings.value("save-position-on-quit", "no") == "yes");
+  m_playbackBehaviorViewModel->setLoopFile(
+      defaultSettings.value("loop-file", "no"));
+  m_playbackBehaviorViewModel->setKeepOpen(
+      defaultSettings.value("keep-open", "no"));
+  m_playbackBehaviorViewModel->setAutofitLarger(
+      defaultSettings.value("autofit-larger", ""));
+  m_playbackBehaviorViewModel->setYtdlRawOptions(
+      defaultSettings.value("ytdl-raw-options", ""));
+
+  m_performanceCachingViewModel->setCache(
+      defaultSettings.value("cache", "yes") == "yes");
+  m_performanceCachingViewModel->setCacheSecs(
+      defaultSettings.value("cache-secs", "10").toInt());
+  m_performanceCachingViewModel->setDemuxerMaxBytes(
+      defaultSettings.value("demuxer-max-bytes", "auto"));
+  m_performanceCachingViewModel->setHwdec(
+      defaultSettings.value("hwdec", "auto-safe"));
+  m_performanceCachingViewModel->setHwdecCodecs(
+      defaultSettings.value("hwdec-codecs", "all"));
+
+  m_interfaceOsdViewModel->setOsdLevel(
+      defaultSettings.value("osd-level", "1").toInt());
+  m_interfaceOsdViewModel->setOsdFontSize(
+      defaultSettings.value("osd-font-size", "28").toInt());
+  m_interfaceOsdViewModel->setOsdDuration(
+      defaultSettings.value("osd-duration", "2000").toInt());
+  m_interfaceOsdViewModel->setOsc(defaultSettings.value("osc", "yes") == "yes");
+  m_interfaceOsdViewModel->setScreenshotFormat(
+      defaultSettings.value("screenshot-format", "png"));
+  m_interfaceOsdViewModel->setScreenshotDirectory(
+      defaultSettings.value("screenshot-directory", "~"));
+  m_interfaceOsdViewModel->setScreenshotTemplate(
+      defaultSettings.value("screenshot-template", "%F_%P"));
 }
 
-// Audio
-auto SettingsViewModel::mute() const -> bool { return m_mute; }
-
-void SettingsViewModel::setMute(bool mute) {
-  if (m_mute != mute) {
-    m_mute = mute;
-    emit muteChanged(m_mute);
+QMap<QString, QString> SettingsViewModel::parseDefaultSettings() {
+  QMap<QString, QString> defaultSettings;
+  QFile file(":/defaults.json");
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qWarning() << "Could not open defaults.json from resources.";
+    return defaultSettings;
   }
-}
 
-auto SettingsViewModel::volume() const -> int { return m_volume; }
+  QByteArray jsonData = file.readAll();
+  file.close();
 
-void SettingsViewModel::setVolume(int volume) {
-  if (m_volume != volume) {
-    m_volume = volume;
-    emit volumeChanged(m_volume);
+  QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+  if (doc.isNull()) {
+    qWarning() << "Failed to parse defaults.json.";
+    return defaultSettings;
   }
-}
 
-auto SettingsViewModel::audioChannels() const -> QString { return m_audioChannels; }
-
-void SettingsViewModel::setAudioChannels(const QString &audioChannels) {
-  if (m_audioChannels != audioChannels) {
-    m_audioChannels = audioChannels;
-    emit audioChannelsChanged(m_audioChannels);
+  if (doc.isObject() && doc.object().contains("options")) {
+    QJsonArray optionsArray = doc.object()["options"].toArray();
+    for (const QJsonValue &value : optionsArray) {
+      if (value.isObject()) {
+        QJsonObject obj = value.toObject();
+        if (obj.contains("name") && obj.contains("default")) {
+          defaultSettings[obj["name"].toString()] = obj["default"].toString();
+        }
+      }
+    }
   }
+
+  return defaultSettings;
 }
 
-auto SettingsViewModel::audioDelay() const -> double { return m_audioDelay; }
-
-void SettingsViewModel::setAudioDelay(double audioDelay) {
-  if (m_audioDelay != audioDelay) {
-    m_audioDelay = audioDelay;
-    emit audioDelayChanged(m_audioDelay);
+QMap<QString, QString> SettingsViewModel::parseOptionDescriptions() {
+  QMap<QString, QString> optionDescriptions;
+  QFile file(":/defaults.json");
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qWarning() << "Could not open defaults.json from resources.";
+    return optionDescriptions;
   }
-}
 
-auto SettingsViewModel::audioDevice() const -> QString { return m_audioDevice; }
+  QByteArray jsonData = file.readAll();
+  file.close();
 
-void SettingsViewModel::setAudioDevice(const QString &audioDevice) {
-  if (m_audioDevice != audioDevice) {
-    m_audioDevice = audioDevice;
-    emit audioDeviceChanged(m_audioDevice);
+  QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+  if (doc.isNull()) {
+    qWarning() << "Failed to parse defaults.json.";
+    return optionDescriptions;
   }
-}
 
-auto SettingsViewModel::audioNormalizeDownmix() const -> bool { return m_audioNormalizeDownmix; }
-
-void SettingsViewModel::setAudioNormalizeDownmix(bool audioNormalizeDownmix) {
-  if (m_audioNormalizeDownmix != audioNormalizeDownmix) {
-    m_audioNormalizeDownmix = audioNormalizeDownmix;
-    emit audioNormalizeDownmixChanged(audioNormalizeDownmix);
+  if (doc.isObject() && doc.object().contains("options")) {
+    QJsonArray optionsArray = doc.object()["options"].toArray();
+    for (const QJsonValue &value : optionsArray) {
+      if (value.isObject()) {
+        QJsonObject obj = value.toObject();
+        if (obj.contains("name") && obj.contains("description")) {
+          optionDescriptions[obj["name"].toString()] =
+              obj["description"].toString();
+        }
+      }
+    }
   }
-}
 
-// Playback & Behavior
-auto SettingsViewModel::resumePlayback() const -> bool { return m_resumePlayback; }
-
-void SettingsViewModel::setResumePlayback(bool resumePlayback) {
-  if (m_resumePlayback != resumePlayback) {
-    m_resumePlayback = resumePlayback;
-    emit resumePlaybackChanged(resumePlayback);
-  }
-}
-
-auto SettingsViewModel::savePositionOnQuit() const -> bool { return m_savePositionOnQuit; }
-
-void SettingsViewModel::setSavePositionOnQuit(bool savePositionOnQuit) {
-  if (m_savePositionOnQuit != savePositionOnQuit) {
-    m_savePositionOnQuit = savePositionOnQuit;
-    emit savePositionOnQuitChanged(savePositionOnQuit);
-  }
-}
-
-auto SettingsViewModel::loopFile() const -> QString { return m_loopFile; }
-
-void SettingsViewModel::setLoopFile(const QString &loopFile) {
-  if (m_loopFile != loopFile) {
-    m_loopFile = loopFile;
-    emit loopFileChanged(loopFile);
-  }
-}
-
-auto SettingsViewModel::keepOpen() const -> QString { return m_keepOpen; }
-
-void SettingsViewModel::setKeepOpen(const QString &keepOpen) {
-  if (m_keepOpen != keepOpen) {
-    m_keepOpen = keepOpen;
-    emit keepOpenChanged(keepOpen);
-  }
-}
-
-auto SettingsViewModel::autofitLarger() const -> QString { return m_autofitLarger; }
-
-void SettingsViewModel::setAutofitLarger(const QString &autofitLarger) {
-  if (m_autofitLarger != autofitLarger) {
-    m_autofitLarger = autofitLarger;
-    emit autofitLargerChanged(autofitLarger);
-  }
-}
-
-auto SettingsViewModel::ytdlRawOptions() const -> QString { return m_ytdlRawOptions; }
-
-void SettingsViewModel::setYtdlRawOptions(const QString &ytdlRawOptions) {
-  if (m_ytdlRawOptions != ytdlRawOptions) {
-    m_ytdlRawOptions = ytdlRawOptions;
-    emit ytdlRawOptionsChanged(ytdlRawOptions);
-  }
-}
-
-// Performance / Caching
-auto SettingsViewModel::cache() const -> bool { return m_cache; }
-
-void SettingsViewModel::setCache(bool cache) {
-  if (m_cache != cache) {
-    m_cache = cache;
-    emit cacheChanged(cache);
-  }
-}
-
-auto SettingsViewModel::cacheSecs() const -> int { return m_cacheSecs; }
-
-void SettingsViewModel::setCacheSecs(int cacheSecs) {
-  if (m_cacheSecs != cacheSecs) {
-    m_cacheSecs = cacheSecs;
-    emit cacheSecsChanged(cacheSecs);
-  }
-}
-
-auto SettingsViewModel::demuxerMaxBytes() const -> QString { return m_demuxerMaxBytes; }
-
-void SettingsViewModel::setDemuxerMaxBytes(const QString &demuxerMaxBytes) {
-  if (m_demuxerMaxBytes != demuxerMaxBytes) {
-    m_demuxerMaxBytes = demuxerMaxBytes;
-    emit demuxerMaxBytesChanged(demuxerMaxBytes);
-  }
-}
-
-auto SettingsViewModel::hwdec() const -> QString { return m_hwdec; }
-
-void SettingsViewModel::setHwdec(const QString &hwdec) {
-  if (m_hwdec != hwdec) {
-    m_hwdec = hwdec;
-    emit hwdecChanged(hwdec);
-  }
-}
-
-auto SettingsViewModel::hwdecCodecs() const -> QString { return m_hwdecCodecs; }
-
-void SettingsViewModel::setHwdecCodecs(const QString &hwdecCodecs) {
-  if (m_hwdecCodecs != hwdecCodecs) {
-    m_hwdecCodecs = hwdecCodecs;
-    emit hwdecCodecsChanged(hwdecCodecs);
-  }
-}
-
-// Interface / OSD
-auto SettingsViewModel::osdLevel() const -> int { return m_osdLevel; }
-
-void SettingsViewModel::setOsdLevel(int osdLevel) {
-  if (m_osdLevel != osdLevel) {
-    m_osdLevel = osdLevel;
-    emit osdLevelChanged(osdLevel);
-  }
-}
-
-auto SettingsViewModel::osdFontSize() const -> int { return m_osdFontSize; }
-
-void SettingsViewModel::setOsdFontSize(int osdFontSize) {
-  if (m_osdFontSize != osdFontSize) {
-    m_osdFontSize = osdFontSize;
-    emit osdFontSizeChanged(osdFontSize);
-  }
-}
-
-auto SettingsViewModel::osdDuration() const -> int { return m_osdDuration; }
-
-void SettingsViewModel::setOsdDuration(int osdDuration) {
-  if (m_osdDuration != osdDuration) {
-    m_osdDuration = osdDuration;
-    emit osdDurationChanged(osdDuration);
-  }
-}
-
-auto SettingsViewModel::osc() const -> bool { return m_osc; }
-
-void SettingsViewModel::setOsc(bool osc) {
-  if (m_osc != osc) {
-    m_osc = osc;
-    emit oscChanged(osc);
-  }
-}
-
-auto SettingsViewModel::screenshotFormat() const -> QString { return m_screenshotFormat; }
-
-void SettingsViewModel::setScreenshotFormat(const QString &screenshotFormat) {
-  if (m_screenshotFormat != screenshotFormat) {
-    m_screenshotFormat = screenshotFormat;
-    emit screenshotFormatChanged(screenshotFormat);
-  }
-}
-
-auto SettingsViewModel::screenshotDirectory() const -> QString { return m_screenshotDirectory; }
-
-void SettingsViewModel::setScreenshotDirectory(const QString &screenshotDirectory) {
-  if (m_screenshotDirectory != screenshotDirectory) {
-    m_screenshotDirectory = screenshotDirectory;
-    emit screenshotDirectoryChanged(screenshotDirectory);
-  }
-}
-
-auto SettingsViewModel::screenshotTemplate() const -> QString { return m_screenshotTemplate; }
-
-void SettingsViewModel::setScreenshotTemplate(const QString &screenshotTemplate) {
-  if (m_screenshotTemplate != screenshotTemplate) {
-    m_screenshotTemplate = screenshotTemplate;
-    emit screenshotTemplateChanged(screenshotTemplate);
-  }
-}
-
-// Video
-auto SettingsViewModel::videoProfile() const -> QString { return m_videoProfile; }
-
-void SettingsViewModel::setVideoProfile(const QString &videoProfile) {
-  if (m_videoProfile != videoProfile) {
-    m_videoProfile = videoProfile;
-    emit videoProfileChanged(m_videoProfile);
-  }
-}
-
-auto SettingsViewModel::videoScale() const -> QString { return m_videoScale; }
-
-void SettingsViewModel::setVideoScale(const QString &videoScale) {
-  if (m_videoScale != videoScale) {
-    m_videoScale = videoScale;
-    emit videoScaleChanged(m_videoScale);
-  }
-}
-
-auto SettingsViewModel::videoDeband() const -> bool { return m_videoDeband; }
-
-void SettingsViewModel::setVideoDeband(bool videoDeband) {
-  if (m_videoDeband != videoDeband) {
-    m_videoDeband = videoDeband;
-    emit videoDebandChanged(m_videoDeband);
-  }
-}
-
-auto SettingsViewModel::videoVo() const -> QString { return m_videoVo; }
-
-void SettingsViewModel::setVideoVo(const QString &videoVo) {
-  if (m_videoVo != videoVo) {
-    m_videoVo = videoVo;
-    emit videoVoChanged(m_videoVo);
-  }
-}
-
-auto SettingsViewModel::videoCscale() const -> QString { return m_videoCscale; }
-
-void SettingsViewModel::setVideoCscale(const QString &videoCscale) {
-  if (m_videoCscale != videoCscale) {
-    m_videoCscale = videoCscale;
-    emit videoCscaleChanged(m_videoCscale);
-  }
-}
-
-auto SettingsViewModel::videoDscale() const -> QString { return m_videoDscale; }
-
-void SettingsViewModel::setVideoDscale(const QString &videoDscale) {
-  if (m_videoDscale != videoDscale) {
-    m_videoDscale = videoDscale;
-    emit videoDscaleChanged(m_videoDscale);
-  }
-}
-
-auto SettingsViewModel::videoInterpolation() const -> bool { return m_videoInterpolation; }
-
-void SettingsViewModel::setVideoInterpolation(bool videoInterpolation) {
-  if (m_videoInterpolation != videoInterpolation) {
-    m_videoInterpolation = videoInterpolation;
-    emit videoInterpolationChanged(m_videoInterpolation);
-  }
-}
-
-auto SettingsViewModel::videoTscale() const -> QString { return m_videoTscale; }
-
-void SettingsViewModel::setVideoTscale(const QString &videoTscale) {
-  if (m_videoTscale != videoTscale) {
-    m_videoTscale = videoTscale;
-    emit videoTscaleChanged(m_videoTscale);
-  }
-}
-
-auto SettingsViewModel::videoVideoSync() const -> QString { return m_videoVideoSync; }
-
-void SettingsViewModel::setVideoVideoSync(const QString &videoVideoSync) {
-  if (m_videoVideoSync != videoVideoSync) {
-    m_videoVideoSync = videoVideoSync;
-    emit videoVideoSyncChanged(m_videoVideoSync);
-  }
-}
-
-// Subtitles
-auto SettingsViewModel::subtitleVisibility() const -> bool {
-  return m_subtitleVisibility;
-}
-
-void SettingsViewModel::setSubtitleVisibility(bool subtitleVisibility) {
-  if (m_subtitleVisibility != subtitleVisibility) {
-    m_subtitleVisibility = subtitleVisibility;
-    emit subtitleVisibilityChanged(m_subtitleVisibility);
-  }
-}
-
-auto SettingsViewModel::subtitleFontSize() const -> int { return m_subtitleFontSize; }
-
-void SettingsViewModel::setSubtitleFontSize(int subtitleFontSize) {
-  if (m_subtitleFontSize != subtitleFontSize) {
-    m_subtitleFontSize = subtitleFontSize;
-    emit subtitleFontSizeChanged(m_subtitleFontSize);
-  }
-}
-
-auto SettingsViewModel::subtitleColor() const -> QString { return m_subtitleColor; }
-
-void SettingsViewModel::setSubtitleColor(const QString &subtitleColor) {
-  if (m_subtitleColor != subtitleColor) {
-    m_subtitleColor = subtitleColor;
-    emit subtitleColorChanged(m_subtitleColor);
-  }
-}
-
-auto SettingsViewModel::subtitleLanguages() const -> QString {
-  return m_subtitleLanguages;
-}
-
-void SettingsViewModel::setSubtitleLanguages(const QString &subtitleLanguages) {
-  if (m_subtitleLanguages != subtitleLanguages) {
-    m_subtitleLanguages = subtitleLanguages;
-    emit subtitleLanguagesChanged(subtitleLanguages);
-  }
-}
-
-// Subtitles
-auto SettingsViewModel::subAuto() const -> QString { return m_subAuto; }
-
-void SettingsViewModel::setSubAuto(const QString &subAuto) {
-  if (m_subAuto != subAuto) {
-    m_subAuto = subAuto;
-    emit subAutoChanged(subAuto);
-  }
-}
-
-auto SettingsViewModel::sid() const -> QString { return m_sid; }
-
-void SettingsViewModel::setSid(const QString &sid) {
-  if (m_sid != sid) {
-    m_sid = sid;
-    emit sidChanged(sid);
-  }
-}
-
-auto SettingsViewModel::subForcedOnly() const -> bool { return m_subForcedOnly; }
-
-void SettingsViewModel::setSubForcedOnly(bool subForcedOnly) {
-  if (m_subForcedOnly != subForcedOnly) {
-    m_subForcedOnly = subForcedOnly;
-    emit subForcedOnlyChanged(subForcedOnly);
-  }
-}
-
-auto SettingsViewModel::subFont() const -> QString { return m_subFont; }
-
-void SettingsViewModel::setSubFont(const QString &subFont) {
-  if (m_subFont != subFont) {
-    m_subFont = subFont;
-    emit subFontChanged(subFont);
-  }
+  return optionDescriptions;
 }

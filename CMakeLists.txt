@@ -9,13 +9,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets Test REQUIRED)
 
-add_executable(MPVDeck
-    src/main.cpp
-    src/models/ConfigManager.cpp
-    src/viewmodels/SettingsViewModel.cpp
-    src/views/SettingsView.cpp
-)
+add_subdirectory(src)
+add_subdirectory(tests)
 
-target_link_libraries(MPVDeck PRIVATE Qt6::Widgets)
+enable_testing()

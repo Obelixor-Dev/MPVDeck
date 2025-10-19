@@ -23,8 +23,17 @@ public:
 private slots:
   void onSaveButtonClicked();
   void onSettingsSaved(bool success);
+  void onRevertButtonClicked();
+  void onLoadDefaultsButtonClicked();
 
 private:
+  QWidget *createAudioTab();
+  QWidget *createVideoTab();
+  QWidget *createSubtitlesTab();
+  QWidget *createPlaybackTab();
+  QWidget *createPerformanceTab();
+  QWidget *createInterfaceTab();
+
   SettingsViewModel *m_viewModel;
   QTabWidget *m_tabWidget;
 };

@@ -4,10 +4,17 @@
 #include <QFile>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QStringConverter>
 
 // Removed constructor
 
+ConfigManager::ConfigManager(const QString& configFilePath) : m_configFilePath(configFilePath) {}
+
 auto ConfigManager::findConfigFile() -> QString {
+  if (!m_configFilePath.isEmpty()) {
+    return m_configFilePath;
+  }
+
   // Get the standard config location using Qt's helper functions
   QString configPath =
       QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
@@ -18,7 +25,7 @@ auto ConfigManager::findConfigFile() -> QString {
 
   QDir mpvConfigDir(configPath + "/mpv");
 
-  if (mpvConfigDir.exists("mpv.conf")) {
+  if (mpvConfigDir.exists("mpv.conf") && QFile::exists(mpvConfigDir.filePath("mpv.conf"))) {
     return mpvConfigDir.filePath("mpv.conf");
   }
 
@@ -26,80 +33,155 @@ auto ConfigManager::findConfigFile() -> QString {
   return {};
 }
 
-auto ConfigManager::readConfigFile() -> QMap<QString, QString> {
-  QMap<QString, QString> settings;
-  QString configFilePath = findConfigFile(); // Call static method
-  if (configFilePath.isEmpty()) {
-    qWarning() << "Config file path is not set.";
-    return settings;
-  }
+auto ConfigManager::parseLine(const QString& line) -> ConfigLine {
+    ConfigLine configLine;
+    QString trimmedLine = line.trimmed();
 
-  QFile configFile(configFilePath);
-  if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    qWarning() << "Could not open config file:" << configFilePath;
-    return settings;
-  }
-
-  QTextStream textStream(&configFile);
-  while (!textStream.atEnd()) {
-    QString line = textStream.readLine().trimmed();
-
-    // Ignore comments and empty lines
-    if (line.isEmpty() || line.startsWith('#')) {
-      continue;
+    if (trimmedLine.isEmpty()) {
+        configLine.type = EmptyLine;
+        configLine.rawText = line; // Preserve original indentation for empty lines
+        return configLine;
     }
 
-    // Strip inline comments
-    int commentIndex = static_cast<int>(line.indexOf('#'));
-    if (commentIndex != -1) {
-      line = line.left(commentIndex).trimmed();
+    if (trimmedLine.startsWith('#')) {
+        configLine.type = Comment;
+        configLine.rawText = line; // Preserve original indentation for comments
+        return configLine;
     }
 
-    if (line.isEmpty()) {
-      continue;
+    // Attempt to parse as KeyValuePair
+    configLine.type = KeyValuePair;
+    configLine.rawText = line; // Store original line for potential comment preservation
+
+    int commentIndex = -1;
+    bool inQuote = false;
+    for (int i = 0; i < line.length(); ++i) {
+        if (line.at(i) == '"') {
+            inQuote = !inQuote;
+        } else if (!inQuote && line.at(i) == '#') {
+            if (i == 0 || line.at(i - 1).isSpace()) { // Only consider # as comment if preceded by space or at start
+                commentIndex = i;
+                break;
+            }
+        }
     }
 
-    int separatorIndex = static_cast<int>(line.indexOf('='));
+    QString effectiveLine = (commentIndex != -1) ? line.left(commentIndex).trimmed() : line.trimmed();
+
+    int separatorIndex = effectiveLine.indexOf('=');
     if (separatorIndex != -1) {
-      QString key = line.left(separatorIndex).trimmed();
-      QString value = line.mid(separatorIndex + 1).trimmed();
+        configLine.key = effectiveLine.left(separatorIndex).trimmed();
+        QString value = effectiveLine.mid(separatorIndex + 1).trimmed();
 
-      // Remove quotes from value
-      if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.mid(1, value.length() - 2);
-      }
-
-      if (!key.isEmpty()) {
-        settings[key] = value;
-      }
+        // Remove quotes from value if present
+        if (value.startsWith('"') && value.endsWith('"')) {
+            value = value.mid(1, value.length() - 2);
+        }
+        configLine.value = value;
     } else {
-      // The whole line is a flag
-      settings[line.trimmed()] = "";
+        // The whole line is a flag, value is empty
+        configLine.key = effectiveLine;
+        configLine.value = "";
     }
-  }
 
-  return settings;
+    return configLine;
 }
 
-auto ConfigManager::saveConfigFile(const QMap<QString, QString> &settings) -> bool {
-  QString configFilePath = findConfigFile(); // Call static method
-  if (configFilePath.isEmpty()) {
-    qWarning() << "Config file path is not set. Cannot save.";
-    return false;
-  }
+auto ConfigManager::serializeLine(const ConfigLine& line) -> QString {
+    switch (line.type) {
+        case EmptyLine:
+        case Comment:
+            return line.rawText;
+        case KeyValuePair:
+            if (line.value.isEmpty()) {
+                return line.key; // For flags
+            } else {
+                // Check if value contains spaces or special characters that require quoting
+                if (line.value.contains(' ') || line.value.contains('#') || line.value.contains('=')) {
+                    return line.key + "=\"" + line.value + "\"";
+                }
+                return line.key + "=" + line.value;
+            }
+    }
+    return {}; // Should not happen
+}
 
-  QFile configFile(configFilePath);
-  if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text |
-                       QIODevice::Truncate)) {
-    qWarning() << "Could not open config file for writing:" << configFilePath;
-    return false;
-  }
+auto ConfigManager::readConfigFile() -> QList<ConfigLine> {
+    m_configLines.clear(); // Clear previous state
+    QString configFilePath = findConfigFile();
+    if (configFilePath.isEmpty()) {
+        qWarning() << "Config file path is not set.";
+        return m_configLines;
+    }
 
-  // WARNING: This implementation overwrites the entire file and loses all
-  // comments.
-  QTextStream out(&configFile);
-  for (auto it = settings.constBegin(); it != settings.constEnd(); ++it) {
-    out << it.key() << "=" << it.value() << "\n";
-  }
-  return true;
+    QFile configFile(configFilePath);
+    if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Could not open config file:" << configFilePath;
+        return m_configLines;
+    }
+
+    QTextStream textStream(&configFile);
+    textStream.setEncoding(QStringConverter::Utf8);
+    while (!textStream.atEnd()) {
+        QString line = textStream.readLine(); // Read original line to preserve indentation/comments
+        m_configLines.append(parseLine(line));
+    }
+
+    configFile.close();
+    return m_configLines;
+}
+
+auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) -> bool {
+    QString configFilePath = findConfigFile();
+    if (configFilePath.isEmpty()) {
+        qWarning() << "Config file path is not set. Cannot save.";
+        return false;
+    }
+
+    // Read the current file to get the latest structure including comments
+    readConfigFile(); // This populates m_configLines
+
+    QMap<QString, QString> settingsToApply = newSettings; // Make a mutable copy
+
+    // Update existing settings in m_configLines
+    for (ConfigLine& line : m_configLines) {
+        if (line.type == KeyValuePair && settingsToApply.contains(line.key)) {
+            line.value = settingsToApply.value(line.key);
+            settingsToApply.remove(line.key);
+        }
+    }
+
+    // Add any new settings that were not in the original file
+    for (auto it = settingsToApply.constBegin(); it != settingsToApply.constEnd(); ++it) {
+        ConfigLine newLine;
+        newLine.type = KeyValuePair;
+        newLine.key = it.key();
+        newLine.value = it.value();
+        m_configLines.append(newLine);
+    }
+
+    QFile configFile(configFilePath);
+    if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning() << "Could not open config file for writing:" << configFilePath;
+        return false;
+    }
+
+    QTextStream out(&configFile);
+    out.setEncoding(QStringConverter::Utf8);
+    for (const ConfigLine& line : m_configLines) {
+        out << serializeLine(line) << "\n";
+    }
+
+    configFile.close();
+    return true;
+}
+
+auto ConfigManager::getSettingsMap() const -> QMap<QString, QString> {
+    QMap<QString, QString> settingsMap;
+    for (const ConfigLine& line : m_configLines) {
+        if (line.type == KeyValuePair) {
+            settingsMap[line.key] = line.value;
+        }
+    }
+    return settingsMap;
 }

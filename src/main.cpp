@@ -35,8 +35,9 @@ auto main(int argc, char *argv[]) -> int {
   qInstallMessageHandler(messageHandler);
   QApplication app(argc, argv);
 
-  // 1. Create ViewModel
-  SettingsViewModel viewModel;
+  // 1. Create Model and ViewModel
+  ConfigManager configManager;
+  SettingsViewModel viewModel(&configManager);
   viewModel.loadSettings();
 
   // 2. Create the View

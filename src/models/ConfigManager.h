@@ -3,12 +3,39 @@
 
 #include <QMap>
 #include <QString>
+#include <QList>
 
 class ConfigManager {
 public:
-  static auto findConfigFile() -> QString;
-  static auto readConfigFile() -> QMap<QString, QString>;
-  static auto saveConfigFile(const QMap<QString, QString> &settings) -> bool;
+  // Enum to represent the type of a line in the config file
+  enum ConfigLineType {
+    KeyValuePair,
+    Comment,
+    EmptyLine
+  };
+
+  // Struct to hold information about a single line in the config file
+  struct ConfigLine {
+    ConfigLineType type;
+    QString key;
+    QString value;
+    QString rawText; // For comments and empty lines, or original key=value string
+  };
+
+  explicit ConfigManager(const QString& configFilePath = "");
+  auto findConfigFile() -> QString;
+  auto readConfigFile() -> QList<ConfigLine>; // Returns the parsed file structure
+  auto saveConfigFile(const QMap<QString, QString> &newSettings) -> bool; // Updates and saves the file
+  auto getSettingsMap() const -> QMap<QString, QString>; // Returns current settings as a map
+
+private:
+  QString m_configFilePath;
+  QList<ConfigLine> m_configLines; // Stores the parsed file structure with comments
+
+  // Helper to parse a single line
+  auto parseLine(const QString& line) -> ConfigLine;
+  // Helper to serialize a ConfigLine back to a string
+  auto serializeLine(const ConfigLine& line) -> QString;
 };
 
 #endif // MPVDECK_CONFIGMANAGER_H
