@@ -27,6 +27,8 @@
 #include <QTextStream>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QSettings>
+#include <QCloseEvent>
 
 using namespace MPVDeck::Constants;
 
@@ -38,9 +40,9 @@ SettingsView::SettingsView(SettingsViewModel *viewModel, QWidget *parent)
   m_tabWidget->addTab(createVideoTab(), "Video");
   m_tabWidget->addTab(createSubtitlesTab(), "Subtitles");
   m_tabWidget->addTab(createPlaybackTab(), "Playback & Behavior");
-  m_tabWidget->addTab(createPerformanceTab(), "⚡ Performance");
-  m_tabWidget->addTab(createInterfaceTab(), "🖥 Interface");
-  m_tabWidget->addTab(createRawConfigTab(), "📄 Raw Config");
+  m_tabWidget->addTab(createPerformanceTab(), "Performance");
+  m_tabWidget->addTab(createInterfaceTab(), "Interface");
+  m_tabWidget->addTab(createRawConfigTab(), "Raw Config");
 
   m_saveButton = new QPushButton("Save", this);
 
@@ -93,6 +95,13 @@ SettingsView::SettingsView(SettingsViewModel *viewModel, QWidget *parent)
   setCentralWidget(centralWidget);
 
   setupMenuBar();
+}
+
+void SettingsView::closeEvent(QCloseEvent *event) {
+  QSettings settings;
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
+  QMainWindow::closeEvent(event);
 }
 
 void SettingsView::onRevertButtonClicked() { m_viewModel->loadSettings(); }

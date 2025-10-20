@@ -17,6 +17,8 @@ public:
                         QWidget *parent = nullptr);
   ~SettingsView() override;
 
+  void closeEvent(QCloseEvent *event) override;
+
   // Explicitly delete copy and move constructors/assignment operators
   SettingsView(const SettingsView &) = delete;
   SettingsView &operator=(const SettingsView &) = delete;

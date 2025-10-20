@@ -2,6 +2,8 @@
 #include <QIcon>
 #include <QMessageBox>
 #include <iostream>
+#include <QSettings>
+#include <QDebug>
 #include "viewmodels/SettingsViewModel.h"
 #include "views/SettingsView.h"
 
@@ -36,6 +38,14 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context,
 auto main(int argc, char *argv[]) -> int {
   qInstallMessageHandler(messageHandler);
   QApplication app(argc, argv);
+
+  // Set application and organization name for QSettings
+  QCoreApplication::setOrganizationName("MPVDeck");
+  QCoreApplication::setApplicationName("MPVDeck");
+
+  // Set default format for QSettings to IniFormat
+  QSettings::setDefaultFormat(QSettings::IniFormat);
+
   app.setWindowIcon(QIcon(":/mcog.png"));
 
   // 1. Create Model and ViewModel
@@ -53,7 +63,13 @@ auto main(int argc, char *argv[]) -> int {
   // 2. Create the View
   SettingsView view(&viewModel);
   view.setWindowTitle("MPVDeck");
-  view.resize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+
+  // Load window settings
+  QSettings settings;
+  qDebug() << "QSettings file:" << settings.fileName();
+  view.restoreGeometry(settings.value("geometry").toByteArray());
+  view.restoreState(settings.value("windowState").toByteArray());
+
   view.show();
 
   // Check if config file exists, if not, prompt to create default
