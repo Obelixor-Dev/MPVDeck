@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QIcon>
+#include <QMessageBox>
 #include <iostream>
 #include "viewmodels/SettingsViewModel.h"
 #include "views/SettingsView.h"
@@ -51,6 +52,19 @@ auto main(int argc, char *argv[]) -> int {
   view.setWindowTitle("MPVDeck");
   view.resize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
   view.show();
+
+  // Check if config file exists, if not, prompt to create default
+  if (!configManager.configFileExists()) {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(nullptr, "MPVDeck",
+                                  "No mpv.conf found. Would you like to create a default one?",
+                                  QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+      viewModel.loadDefaults();
+      viewModel.saveSettings();
+      QMessageBox::information(nullptr, "MPVDeck", "Default mpv.conf created.");
+    }
+  }
 
   return QApplication::exec();
 }

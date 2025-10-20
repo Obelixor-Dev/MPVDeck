@@ -24,6 +24,7 @@ public:
 
   explicit ConfigManager(const QString& configFilePath = "");
   auto findConfigFile() -> QString;
+  auto configFileExists() const -> bool;
   auto readConfigFile() -> QList<ConfigLine>; // Returns the parsed file structure
   auto saveConfigFile(const QMap<QString, QString> &newSettings) -> bool; // Updates and saves the file
   auto getSettingsMap() const -> QMap<QString, QString>; // Returns current settings as a map

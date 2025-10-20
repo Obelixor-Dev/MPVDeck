@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QStandardPaths>
 #include <QTextStream>
 #include <QStringConverter>
@@ -25,12 +26,16 @@ auto ConfigManager::findConfigFile() -> QString {
 
   QDir mpvConfigDir(configPath + "/mpv");
 
-  if (mpvConfigDir.exists("mpv.conf") && QFile::exists(mpvConfigDir.filePath("mpv.conf"))) {
-    return mpvConfigDir.filePath("mpv.conf");
-  }
+  // Always return the expected path, even if the file doesn't exist yet.
+  return mpvConfigDir.filePath("mpv.conf");
+}
 
-  // Return an empty string if not found
-  return {};
+auto ConfigManager::configFileExists() const -> bool {
+  QString pathToCheck = m_configFilePath;
+  if (pathToCheck.isEmpty()) {
+    pathToCheck = const_cast<ConfigManager*>(this)->findConfigFile();
+  }
+  return QFile::exists(pathToCheck);
 }
 
 auto ConfigManager::parseLine(const QString& line) -> ConfigLine {
@@ -138,6 +143,16 @@ auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) ->
         return false;
     }
 
+    QFileInfo fileInfo(configFilePath);
+    QDir configDir = fileInfo.dir();
+    if (!configDir.exists()) {
+        qDebug() << "Creating config directory:" << configDir.path();
+        if (!configDir.mkpath(".")) {
+            qWarning() << "Failed to create config directory:" << configDir.path();
+            return false;
+        }
+    }
+
     // Read the current file to get the latest structure including comments
     readConfigFile(); // This populates m_configLines
 
@@ -162,7 +177,7 @@ auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) ->
 
     QFile configFile(configFilePath);
     if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning() << "Could not open config file for writing:" << configFilePath;
+        qWarning() << "Could not open config file for writing:" << configFilePath << ", Error:" << configFile.errorString();
         return false;
     }
 
@@ -173,6 +188,7 @@ auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) ->
     }
 
     configFile.close();
+    qDebug() << "Config file saved successfully to:" << configFilePath;
     return true;
 }
 
