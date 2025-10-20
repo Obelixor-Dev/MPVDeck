@@ -1,4 +1,5 @@
 #include "AudioViewModel.h"
+#include "Constants.h"
 
 AudioViewModel::AudioViewModel(QObject *parent) : QObject(parent) {}
 
@@ -15,7 +16,7 @@ auto AudioViewModel::volume() const -> int { return m_volume; }
 
 void AudioViewModel::setVolume(int volume) {
     if (volume < 0) volume = 0;
-    if (volume > 100) volume = 100;
+    if (volume > MPVDeck::Constants::MAX_VOLUME) volume = MPVDeck::Constants::MAX_VOLUME;
     if (m_volume != volume) {
         m_volume = volume;
         emit volumeChanged(m_volume);

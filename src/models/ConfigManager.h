@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QString>
 #include <QList>
+#include "ConfigResult.h"
 
 class ConfigManager {
 public:
@@ -26,7 +27,7 @@ public:
   auto findConfigFile() -> QString;
   auto configFileExists() const -> bool;
   auto readConfigFile() -> QList<ConfigLine>; // Returns the parsed file structure
-  auto saveConfigFile(const QMap<QString, QString> &newSettings) -> bool; // Updates and saves the file
+  auto saveConfigFile(const QMap<QString, QString> &newSettings, bool reuseExistingLines = false) -> MPVDeck::ConfigResult; // Updates and saves the file
   auto getSettingsMap() const -> QMap<QString, QString>; // Returns current settings as a map
   QString getRawConfig() const;
   void parseRawConfig(const QString &configText);

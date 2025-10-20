@@ -8,24 +8,30 @@
 #include "PlaybackBehaviorViewModel.h"
 #include "SubtitleViewModel.h"
 #include "VideoViewModel.h"
+#include <QByteArray>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMap>
 #include <QObject>
 #include <QString>
-#include <QFile>
-#include <QByteArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 
 class SettingsViewModel : public QObject {
   Q_OBJECT
   Q_PROPERTY(AudioViewModel *audioViewModel READ audioViewModel CONSTANT)
   Q_PROPERTY(VideoViewModel *videoViewModel READ videoViewModel CONSTANT)
-  Q_PROPERTY(SubtitleViewModel *subtitleViewModel READ subtitleViewModel CONSTANT)
-  Q_PROPERTY(PlaybackBehaviorViewModel *playbackBehaviorViewModel READ playbackBehaviorViewModel CONSTANT)
-  Q_PROPERTY(PerformanceCachingViewModel *performanceCachingViewModel READ performanceCachingViewModel CONSTANT)
-  Q_PROPERTY(InterfaceOsdViewModel *interfaceOsdViewModel READ interfaceOsdViewModel CONSTANT)
-  Q_PROPERTY(bool autoReloadRawConfig READ autoReloadRawConfig WRITE setAutoReloadRawConfig NOTIFY autoReloadRawConfigChanged)
+  Q_PROPERTY(
+      SubtitleViewModel *subtitleViewModel READ subtitleViewModel CONSTANT)
+  Q_PROPERTY(PlaybackBehaviorViewModel *playbackBehaviorViewModel READ
+                 playbackBehaviorViewModel CONSTANT)
+  Q_PROPERTY(PerformanceCachingViewModel *performanceCachingViewModel READ
+                 performanceCachingViewModel CONSTANT)
+  Q_PROPERTY(InterfaceOsdViewModel *interfaceOsdViewModel READ
+                 interfaceOsdViewModel CONSTANT)
+  Q_PROPERTY(bool autoReloadRawConfig READ autoReloadRawConfig WRITE
+                 setAutoReloadRawConfig NOTIFY autoReloadRawConfigChanged)
+  Q_PROPERTY(bool isDirty READ isDirty WRITE setIsDirty NOTIFY isDirtyChanged)
 
 public:
   explicit SettingsViewModel(ConfigManager *configManager,
@@ -56,10 +62,15 @@ public:
       -> InterfaceOsdViewModel *; // Getter for InterfaceOsdViewModel
   [[nodiscard]] bool autoReloadRawConfig() const;
   void setAutoReloadRawConfig(bool autoReloadRawConfig);
+  [[nodiscard]] bool isDirty() const;
+
+public slots:
+  void setIsDirty(bool dirty);
 
 signals:
   void settingsSaved(bool success);
   void autoReloadRawConfigChanged(bool autoReloadRawConfig);
+  void isDirtyChanged(bool isDirty);
 
 private:
   QMap<QString, QString> m_settings;
@@ -74,7 +85,8 @@ private:
                                       // PerformanceCachingViewModel
   InterfaceOsdViewModel
       *m_interfaceOsdViewModel; // New member for InterfaceOsdViewModel
-  bool m_autoReloadRawConfig;
+  bool m_autoReloadRawConfig = false;
+  bool m_isDirty = false;
 };
 
 #endif // MPVDECK_SETTINGSVIEWMODEL_H

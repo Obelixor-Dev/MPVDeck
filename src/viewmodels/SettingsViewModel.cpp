@@ -1,5 +1,6 @@
 #include "SettingsViewModel.h"
 #include "../models/ConfigManager.h"
+#include "../models/ConfigResult.h"
 #include "AudioViewModel.h"        // Include the new AudioViewModel header
 #include "InterfaceOsdViewModel.h" // Include the new InterfaceOsdViewModel header
 #include "PerformanceCachingViewModel.h" // Include the new PerformanceCachingViewModel header
@@ -25,8 +26,111 @@ SettingsViewModel::SettingsViewModel(ConfigManager *configManager,
       m_performanceCachingViewModel(new PerformanceCachingViewModel(
           this)), // Initialize PerformanceCachingViewModel
       m_interfaceOsdViewModel(
-          new InterfaceOsdViewModel(this)) // Initialize InterfaceOsdViewModel
-{}
+          new InterfaceOsdViewModel(this)) { // Initialize InterfaceOsdViewModel
+
+  // Connect all change signals to mark as dirty
+  connect(m_audioViewModel, &AudioViewModel::muteChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_audioViewModel, &AudioViewModel::volumeChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_audioViewModel, &AudioViewModel::audioDeviceChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_audioViewModel, &AudioViewModel::audioChannelsChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_audioViewModel, &AudioViewModel::audioDelayChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_audioViewModel, &AudioViewModel::audioNormalizeDownmixChanged, this,
+          [this]() { setIsDirty(true); });
+
+  connect(m_videoViewModel, &VideoViewModel::videoProfileChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoScaleChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoCscaleChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoDscaleChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoInterpolationChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoTscaleChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoVideoSyncChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoDebandChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_videoViewModel, &VideoViewModel::videoVoChanged, this,
+          [this]() { setIsDirty(true); });
+
+  connect(m_subtitleViewModel, &SubtitleViewModel::subtitleVisibilityChanged,
+          this, [this]() { setIsDirty(true); });
+  connect(m_subtitleViewModel, &SubtitleViewModel::subtitleFontSizeChanged,
+          this, [this]() { setIsDirty(true); });
+  connect(m_subtitleViewModel, &SubtitleViewModel::subtitleColorChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_subtitleViewModel, &SubtitleViewModel::subtitleLanguagesChanged,
+          this, [this]() { setIsDirty(true); });
+  connect(m_subtitleViewModel, &SubtitleViewModel::subAutoChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_subtitleViewModel, &SubtitleViewModel::sidChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_subtitleViewModel, &SubtitleViewModel::subForcedOnlyChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_subtitleViewModel, &SubtitleViewModel::subFontChanged, this,
+          [this]() { setIsDirty(true); });
+
+  connect(m_playbackBehaviorViewModel,
+          &PlaybackBehaviorViewModel::resumePlaybackChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_playbackBehaviorViewModel,
+          &PlaybackBehaviorViewModel::savePositionOnQuitChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_playbackBehaviorViewModel,
+          &PlaybackBehaviorViewModel::loopFileChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_playbackBehaviorViewModel,
+          &PlaybackBehaviorViewModel::keepOpenChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_playbackBehaviorViewModel,
+          &PlaybackBehaviorViewModel::autofitLargerChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_playbackBehaviorViewModel,
+          &PlaybackBehaviorViewModel::ytdlRawOptionsChanged, this,
+          [this]() { setIsDirty(true); });
+
+  connect(m_performanceCachingViewModel,
+          &PerformanceCachingViewModel::cacheChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_performanceCachingViewModel,
+          &PerformanceCachingViewModel::cacheSecsChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_performanceCachingViewModel,
+          &PerformanceCachingViewModel::demuxerMaxBytesChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_performanceCachingViewModel,
+          &PerformanceCachingViewModel::hwdecChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_performanceCachingViewModel,
+          &PerformanceCachingViewModel::hwdecCodecsChanged, this,
+          [this]() { setIsDirty(true); });
+
+  connect(m_interfaceOsdViewModel, &InterfaceOsdViewModel::osdLevelChanged,
+          this, [this]() { setIsDirty(true); });
+  connect(m_interfaceOsdViewModel, &InterfaceOsdViewModel::osdFontSizeChanged,
+          this, [this]() { setIsDirty(true); });
+  connect(m_interfaceOsdViewModel, &InterfaceOsdViewModel::osdDurationChanged,
+          this, [this]() { setIsDirty(true); });
+  connect(m_interfaceOsdViewModel, &InterfaceOsdViewModel::oscChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_interfaceOsdViewModel,
+          &InterfaceOsdViewModel::screenshotFormatChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_interfaceOsdViewModel,
+          &InterfaceOsdViewModel::screenshotDirectoryChanged, this,
+          [this]() { setIsDirty(true); });
+  connect(m_interfaceOsdViewModel,
+          &InterfaceOsdViewModel::screenshotTemplateChanged, this,
+          [this]() { setIsDirty(true); });
+}
 
 auto SettingsViewModel::audioViewModel() const -> AudioViewModel * {
   return m_audioViewModel;
@@ -212,6 +316,7 @@ void SettingsViewModel::loadSettings() {
     m_interfaceOsdViewModel->setScreenshotTemplate(
         m_settings.value("screenshot-template"));
   }
+  setIsDirty(false);
 }
 
 void SettingsViewModel::saveSettings() {
@@ -283,8 +388,10 @@ void SettingsViewModel::saveSettings() {
   m_settings["screenshot-template"] =
       m_interfaceOsdViewModel->screenshotTemplate();
 
-  bool success = m_configManager->saveConfigFile(m_settings);
-  emit settingsSaved(success);
+  MPVDeck::ConfigResult result =
+      m_configManager->saveConfigFile(m_settings, false);
+  emit settingsSaved(result.success);
+  setIsDirty(false);
 }
 
 void SettingsViewModel::loadDefaults() {
@@ -318,7 +425,7 @@ void SettingsViewModel::loadDefaults() {
   m_videoViewModel->setVideoVo(defaultSettings.value("vo", "gpu"));
 
   m_subtitleViewModel->setSubtitleVisibility(
-      defaultSettings.value("no-sub", "no") == "no");
+      defaultSettings.value("sub-visibility", "yes") == "yes");
   m_subtitleViewModel->setSubAuto(defaultSettings.value("sub-auto", "fuzzy"));
   m_subtitleViewModel->setSid(defaultSettings.value("sid", "0"));
   m_subtitleViewModel->setSubtitleLanguages(defaultSettings.value("slang", ""));
@@ -435,30 +542,39 @@ QMap<QString, QString> SettingsViewModel::parseOptionDescriptions() {
 }
 
 QString SettingsViewModel::getRawConfig() {
-    return m_configManager->getRawConfig();
+  return m_configManager->getRawConfig();
 }
 
 void SettingsViewModel::applyRawConfig(const QString &configText) {
-    m_configManager->parseRawConfig(configText);
-    loadSettings(); // Reload settings from the (now updated) config manager
+  m_configManager->parseRawConfig(configText);
+  // Save the parsed raw config, reusing the lines already parsed
+  m_configManager->saveConfigFile(m_configManager->getSettingsMap(), true);
+  loadSettings(); // Reload settings from the (now updated) config manager
 }
 
 QString SettingsViewModel::getOptionDescription(const QString &optionName) {
-    static QMap<QString, QString> descriptions = parseOptionDescriptions();
-    return descriptions.value(optionName, "MPV configuration option");
+  static QMap<QString, QString> descriptions = parseOptionDescriptions();
+  return descriptions.value(optionName, "MPV configuration option");
 }
 
-bool SettingsViewModel::autoReloadRawConfig() const
-{
-    return m_autoReloadRawConfig;
+bool SettingsViewModel::autoReloadRawConfig() const {
+  return m_autoReloadRawConfig;
 }
 
-void SettingsViewModel::setAutoReloadRawConfig(bool autoReloadRawConfig)
-{
-    if (m_autoReloadRawConfig == autoReloadRawConfig)
-        return;
+void SettingsViewModel::setAutoReloadRawConfig(bool autoReloadRawConfig) {
+  if (m_autoReloadRawConfig == autoReloadRawConfig)
+    return;
 
-    m_autoReloadRawConfig = autoReloadRawConfig;
-    emit autoReloadRawConfigChanged(m_autoReloadRawConfig);
+  m_autoReloadRawConfig = autoReloadRawConfig;
+  emit autoReloadRawConfigChanged(m_autoReloadRawConfig);
 }
 
+bool SettingsViewModel::isDirty() const { return m_isDirty; }
+
+void SettingsViewModel::setIsDirty(bool dirty) {
+  if (m_isDirty == dirty)
+    return;
+
+  m_isDirty = dirty;
+  emit isDirtyChanged(m_isDirty);
+}

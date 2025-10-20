@@ -1,4 +1,5 @@
 #include "ConfigManager.h"
+#include "ConfigResult.h"
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -136,11 +137,11 @@ auto ConfigManager::readConfigFile() -> QList<ConfigLine> {
     return m_configLines;
 }
 
-auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) -> bool {
+auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings, bool reuseExistingLines) -> MPVDeck::ConfigResult {
     QString configFilePath = findConfigFile();
     if (configFilePath.isEmpty()) {
         qWarning() << "Config file path is not set. Cannot save.";
-        return false;
+        return MPVDeck::ConfigResult::failureResult("Config file path is not set. Cannot save.");
     }
 
     QFileInfo fileInfo(configFilePath);
@@ -148,13 +149,16 @@ auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) ->
     if (!configDir.exists()) {
         qDebug() << "Creating config directory:" << configDir.path();
         if (!configDir.mkpath(".")) {
-            qWarning() << "Failed to create config directory:" << configDir.path();
-            return false;
+            QString errorMessage = "Failed to create config directory: " + configDir.path();
+            qWarning() << errorMessage;
+            return MPVDeck::ConfigResult::failureResult(errorMessage);
         }
     }
 
     // Read the current file to get the latest structure including comments
-    readConfigFile(); // This populates m_configLines
+    if (!reuseExistingLines) {
+        readConfigFile(); // This populates m_configLines
+    }
 
     QMap<QString, QString> settingsToApply = newSettings; // Make a mutable copy
 
@@ -177,8 +181,9 @@ auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) ->
 
     QFile configFile(configFilePath);
     if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning() << "Could not open config file for writing:" << configFilePath << ", Error:" << configFile.errorString();
-        return false;
+        QString errorMessage = "Could not open config file for writing: " + configFilePath + ", Error: " + configFile.errorString();
+        qWarning() << errorMessage;
+        return MPVDeck::ConfigResult::failureResult(errorMessage);
     }
 
     QTextStream out(&configFile);
@@ -189,7 +194,7 @@ auto ConfigManager::saveConfigFile(const QMap<QString, QString> &newSettings) ->
 
     configFile.close();
     qDebug() << "Config file saved successfully to:" << configFilePath;
-    return true;
+    return MPVDeck::ConfigResult::successResult();
 }
 
 auto ConfigManager::getSettingsMap() const -> QMap<QString, QString> {

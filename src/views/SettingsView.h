@@ -1,9 +1,10 @@
 #ifndef MPVDECK_SETTINGSVIEW_H
 #define MPVDECK_SETTINGSVIEW_H
 
+#include <QLineEdit>
 #include <QMainWindow>
 #include <QPlainTextEdit>
-#include <QLineEdit>
+#include <QPushButton>
 
 class SettingsViewModel;
 class QTabWidget;
@@ -17,16 +18,17 @@ public:
   ~SettingsView() override;
 
   // Explicitly delete copy and move constructors/assignment operators
-  SettingsView(const SettingsView&) = delete;
-  SettingsView& operator=(const SettingsView&) = delete;
-  SettingsView(SettingsView&&) = delete;
-  SettingsView& operator=(SettingsView&&) = delete;
+  SettingsView(const SettingsView &) = delete;
+  SettingsView &operator=(const SettingsView &) = delete;
+  SettingsView(SettingsView &&) = delete;
+  SettingsView &operator=(SettingsView &&) = delete;
 
 private slots:
   void onSaveButtonClicked();
   void onSettingsSaved(bool success);
   void onRevertButtonClicked();
   void onLoadDefaultsButtonClicked();
+  void updateSaveButtonState(bool isDirty);
 
 private:
   QMenu *m_fileMenu;
@@ -46,9 +48,11 @@ private:
   QTabWidget *m_tabWidget;
   QLineEdit *m_searchEdit;
   QPlainTextEdit *m_rawConfigEditor;
-
+  QPushButton *m_saveButton;
+  QPushButton *m_revertButton;
 
   void filterTabs(const QString &searchText);
+  bool searchWidgets(QWidget *parentWidget, const QString &searchText);
 };
 
 #endif // MPVDECK_SETTINGSVIEW_H
