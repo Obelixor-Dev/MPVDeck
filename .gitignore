@@ -6,3 +6,4 @@ cmake-build-clang-tidy/
 cmake-build-debug/
 combined_project.txt
 cmake-build-release/
+docs-dev/
