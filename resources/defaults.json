@@ -37,7 +37,7 @@
     { "name": "osc", "default": "yes", "description": "On-screen controller" },
     { "name": "screenshot-format", "default": "png", "description": "Screenshot format" },
     { "name": "screenshot-directory", "default": "~", "description": "Screenshot folder" },
-    { "name": "screenshot-template", "default": ""%F_%P"", "description": "File naming template (quotes needed)" },
+    { "name": "screenshot-template", "default": "%F_%P", "description": "File naming template (quotes needed)" },
     { "name": "ytdl-raw-options", "default": "", "description": "Prevent YouTube auto-generated subtitles" }
   ]
 }

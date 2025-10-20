@@ -46,6 +46,9 @@ auto main(int argc, char *argv[]) -> int {
   qDebug() << "AudioVM:" << viewModel.audioViewModel();
   qDebug() << "VideoVM:" << viewModel.videoViewModel();
   qDebug() << "PerformanceVM:" << viewModel.performanceCachingViewModel();
+  qDebug() << "SubtitleVM:" << viewModel.subtitleViewModel();
+  qDebug() << "PlaybackBehaviorVM:" << viewModel.playbackBehaviorViewModel();
+  qDebug() << "InterfaceOsdVM:" << viewModel.interfaceOsdViewModel();
 
   // 2. Create the View
   SettingsView view(&viewModel);
