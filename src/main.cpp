@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QIcon>
 #include <iostream>
 #include "viewmodels/SettingsViewModel.h"
 #include "views/SettingsView.h"
@@ -34,11 +35,16 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context,
 auto main(int argc, char *argv[]) -> int {
   qInstallMessageHandler(messageHandler);
   QApplication app(argc, argv);
+  app.setWindowIcon(QIcon(":/mcog.png"));
 
   // 1. Create Model and ViewModel
   ConfigManager configManager;
   SettingsViewModel viewModel(&configManager);
   viewModel.loadSettings();
+
+  qDebug() << "AudioVM:" << viewModel.audioViewModel();
+  qDebug() << "VideoVM:" << viewModel.videoViewModel();
+  qDebug() << "PerformanceVM:" << viewModel.performanceCachingViewModel();
 
   // 2. Create the View
   SettingsView view(&viewModel);
