@@ -45,6 +45,8 @@ private:
   SettingsViewModel *m_viewModel;
   QTabWidget *m_tabWidget;
   QLineEdit *m_searchEdit;
+  QPlainTextEdit *m_rawConfigEditor;
+
 
   void filterTabs(const QString &searchText);
 };

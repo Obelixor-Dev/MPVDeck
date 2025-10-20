@@ -713,26 +713,26 @@ QWidget *SettingsView::createRawConfigTab() {
     buttonLayout->addStretch();
 
     // Text editor
-    auto *textEdit = new QPlainTextEdit(this);
-    textEdit->setPlaceholderText("// Raw mpv.conf editor\n// Use buttons to sync with form or edit directly");
+    m_rawConfigEditor = new QPlainTextEdit(this);
+    m_rawConfigEditor->setPlaceholderText("// Raw mpv.conf editor\n// Use buttons to sync with form or edit directly");
 
     // Syntax highlighting (basic)
     QFont font("Monospace", 9);
-    textEdit->setFont(font);
+    m_rawConfigEditor->setFont(font);
 
     layout->addLayout(buttonLayout);
-    layout->addWidget(textEdit);
+    layout->addWidget(m_rawConfigEditor);
 
     // Connect signals
-    connect(refreshBtn, &QPushButton::clicked, [this, textEdit]() {
-        refreshRawEditor(textEdit);
+    connect(refreshBtn, &QPushButton::clicked, [this]() {
+        refreshRawEditor(m_rawConfigEditor);
     });
 
-    connect(applyBtn, &QPushButton::clicked, [this, textEdit]() {
-        applyRawConfig(textEdit->toPlainText());
+    connect(applyBtn, &QPushButton::clicked, [this]() {
+        applyRawConfig(m_rawConfigEditor->toPlainText());
     });
 
-    connect(exportBtn, &QPushButton::clicked, [this, textEdit]() {
+    connect(exportBtn, &QPushButton::clicked, [this]() {
         QString fileName = QFileDialog::getSaveFileName(this, tr("Export mpv.conf"),
                                                         "mpv.conf",
                                                         tr("MPV Configuration Files (*.conf);;All Files (*)"));
@@ -740,7 +740,7 @@ QWidget *SettingsView::createRawConfigTab() {
             QFile file(fileName);
             if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 QTextStream out(&file);
-                out << textEdit->toPlainText();
+                out << m_rawConfigEditor->toPlainText();
                 file.close();
                 QMessageBox::information(this, tr("Export Successful"), tr("Configuration exported to %1").arg(fileName));
             } else {
@@ -750,7 +750,7 @@ QWidget *SettingsView::createRawConfigTab() {
     });
 
     // Initial load
-    refreshRawEditor(textEdit);
+    refreshRawEditor(m_rawConfigEditor);
 
     return tab;
 }
@@ -774,6 +774,7 @@ void SettingsView::onSettingsSaved(bool success) {
   if (success) {
     msgBox.setText("Settings saved successfully!");
     msgBox.setIcon(QMessageBox::Information);
+    refreshRawEditor(m_rawConfigEditor);
   } else {
     msgBox.setText("Failed to save settings.");
     msgBox.setIcon(QMessageBox::Critical);

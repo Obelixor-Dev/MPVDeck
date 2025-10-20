@@ -11,19 +11,21 @@
 #include <QMap>
 #include <QObject>
 #include <QString>
+#include <QFile>
+#include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 class SettingsViewModel : public QObject {
   Q_OBJECT
   Q_PROPERTY(AudioViewModel *audioViewModel READ audioViewModel CONSTANT)
   Q_PROPERTY(VideoViewModel *videoViewModel READ videoViewModel CONSTANT)
-  Q_PROPERTY(
-      SubtitleViewModel *subtitleViewModel READ subtitleViewModel CONSTANT)
-  Q_PROPERTY(PlaybackBehaviorViewModel *playbackBehaviorViewModel READ
-                 playbackBehaviorViewModel CONSTANT)
-  Q_PROPERTY(PerformanceCachingViewModel *performanceCachingViewModel READ
-                 performanceCachingViewModel CONSTANT)
-  Q_PROPERTY(InterfaceOsdViewModel *interfaceOsdViewModel READ
-                 interfaceOsdViewModel CONSTANT)
+  Q_PROPERTY(SubtitleViewModel *subtitleViewModel READ subtitleViewModel CONSTANT)
+  Q_PROPERTY(PlaybackBehaviorViewModel *playbackBehaviorViewModel READ playbackBehaviorViewModel CONSTANT)
+  Q_PROPERTY(PerformanceCachingViewModel *performanceCachingViewModel READ performanceCachingViewModel CONSTANT)
+  Q_PROPERTY(InterfaceOsdViewModel *interfaceOsdViewModel READ interfaceOsdViewModel CONSTANT)
+  Q_PROPERTY(bool autoReloadRawConfig READ autoReloadRawConfig WRITE setAutoReloadRawConfig NOTIFY autoReloadRawConfigChanged)
 
 public:
   explicit SettingsViewModel(ConfigManager *configManager,
@@ -52,9 +54,12 @@ public:
           *; // Getter for PerformanceCachingViewModel
   [[nodiscard]] auto interfaceOsdViewModel() const
       -> InterfaceOsdViewModel *; // Getter for InterfaceOsdViewModel
+  [[nodiscard]] bool autoReloadRawConfig() const;
+  void setAutoReloadRawConfig(bool autoReloadRawConfig);
 
 signals:
   void settingsSaved(bool success);
+  void autoReloadRawConfigChanged(bool autoReloadRawConfig);
 
 private:
   QMap<QString, QString> m_settings;
@@ -69,6 +74,7 @@ private:
                                       // PerformanceCachingViewModel
   InterfaceOsdViewModel
       *m_interfaceOsdViewModel; // New member for InterfaceOsdViewModel
+  bool m_autoReloadRawConfig;
 };
 
 #endif // MPVDECK_SETTINGSVIEWMODEL_H

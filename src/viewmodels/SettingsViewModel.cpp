@@ -447,3 +447,18 @@ QString SettingsViewModel::getOptionDescription(const QString &optionName) {
     static QMap<QString, QString> descriptions = parseOptionDescriptions();
     return descriptions.value(optionName, "MPV configuration option");
 }
+
+bool SettingsViewModel::autoReloadRawConfig() const
+{
+    return m_autoReloadRawConfig;
+}
+
+void SettingsViewModel::setAutoReloadRawConfig(bool autoReloadRawConfig)
+{
+    if (m_autoReloadRawConfig == autoReloadRawConfig)
+        return;
+
+    m_autoReloadRawConfig = autoReloadRawConfig;
+    emit autoReloadRawConfigChanged(m_autoReloadRawConfig);
+}
+
