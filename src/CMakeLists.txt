@@ -4,7 +4,7 @@ add_executable(MPVDeck
 )
 
 target_link_libraries(MPVDeck PRIVATE Qt6::Widgets MPVDeckViewModels MPVDeckViews)
-target_compile_features(MPVDeck PRIVATE cxx_std_17)
+target_compile_features(MPVDeck PRIVATE cxx_std_20)
 
 add_subdirectory(models)
 add_subdirectory(viewmodels)

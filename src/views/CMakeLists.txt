@@ -8,4 +8,4 @@ target_include_directories(MPVDeckViews PUBLIC
 )
 
 target_link_libraries(MPVDeckViews PRIVATE Qt6::Widgets MPVDeckViewModels MPVDeckCore)
-target_compile_features(MPVDeckViews PRIVATE cxx_std_17)
+target_compile_features(MPVDeckViews PRIVATE cxx_std_20)

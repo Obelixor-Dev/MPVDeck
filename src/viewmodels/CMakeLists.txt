@@ -21,4 +21,4 @@ target_include_directories(MPVDeckViewModels PUBLIC
 )
 
 target_link_libraries(MPVDeckViewModels PRIVATE Qt6::Widgets MPVDeckCore)
-target_compile_features(MPVDeckViewModels PRIVATE cxx_std_17)
+target_compile_features(MPVDeckViewModels PRIVATE cxx_std_20)
