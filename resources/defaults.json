@@ -1,204 +1,43 @@
 {
   "options": [
-    {
-      "name": "vo",
-      "default": "gpu",
-      "description": "Video output driver"
-    },
-    {
-      "name": "profile",
-      "default": "gpu-hq",
-      "description": "Preset video options"
-    },
-    {
-      "name": "scale",
-      "default": "ewa_lanczossharp",
-      "description": "Upscaling filter"
-    },
-    {
-      "name": "cscale",
-      "default": "ewa_lanczossharp",
-      "description": "Chroma upscaling"
-    },
-    {
-      "name": "dscale",
-      "default": "mitchell",
-      "description": "Downscaling filter"
-    },
-    {
-      "name": "interpolation",
-      "default": "no",
-      "description": "Enable frame interpolation"
-    },
-    {
-      "name": "tscale",
-      "default": "oversample",
-      "description": "Temporal scaling"
-    },
-    {
-      "name": "video-sync",
-      "default": "display-resample",
-      "description": "Audio/video sync method"
-    },
-    {
-      "name": "deband",
-      "default": "no",
-      "description": "Apply debanding filter"
-    },
-    {
-      "name": "audio-device",
-      "default": "auto",
-      "description": "Audio output device"
-    },
-    {
-      "name": "volume",
-      "default": "100",
-      "description": "Default volume"
-    },
-    {
-      "name": "audio-channels",
-      "default": "stereo",
-      "description": "Audio channel layout"
-    },
-    {
-      "name": "audio-delay",
-      "default": "0.0",
-      "description": "Audio delay in seconds"
-    },
-    {
-      "name": "audio-normalize-downmix",
-      "default": "yes",
-      "description": "Normalize volume on downmix"
-    },
-    {
-      "name": "sub-visibility",
-      "default": "yes",
-      "description": "Enable subtitles (inverted from mpv's no-sub option)"
-    },
-    {
-      "name": "sub-auto",
-      "default": "fuzzy",
-      "description": "Auto-load subtitle files"
-    },
-    {
-      "name": "sid",
-      "default": "0",
-      "description": "Subtitle track selection (`no` = none)"
-    },
-    {
-      "name": "slang",
-      "default": "",
-      "description": "Preferred subtitle language"
-    },
-    {
-      "name": "sub-forced-only",
-      "default": "no",
-      "description": "Show only forced subtitles"
-    },
-    {
-      "name": "sub-font",
-      "default": "Sans",
-      "description": "Subtitle font"
-    },
-    {
-      "name": "sub-font-size",
-      "default": "36",
-      "description": "Subtitle font size"
-    },
-    {
-      "name": "sub-color",
-      "default": "#FFFFFF",
-      "description": "Subtitle colour"
-    },
-    {
-      "name": "resume-playback",
-      "default": "no",
-      "description": "Resume last position"
-    },
-    {
-      "name": "save-position-on-quit",
-      "default": "no",
-      "description": "Save position when quitting"
-    },
-    {
-      "name": "loop-file",
-      "default": "no",
-      "description": "Loop current file"
-    },
-    {
-      "name": "keep-open",
-      "default": "no",
-      "description": "Keep window open after playback ends"
-    },
-    {
-      "name": "autofit-larger",
-      "default": "",
-      "description": "Resize window automatically"
-    },
-    {
-      "name": "cache",
-      "default": "yes",
-      "description": "Enable input/network cache"
-    },
-    {
-      "name": "cache-secs",
-      "default": "10",
-      "description": "Cache duration"
-    },
-    {
-      "name": "demuxer-max-bytes",
-      "default": "auto",
-      "description": "Max buffer for demuxer"
-    },
-    {
-      "name": "hwdec",
-      "default": "auto-safe",
-      "description": "Hardware decoding mode"
-    },
-    {
-      "name": "hwdec-codecs",
-      "default": "all",
-      "description": "Which codecs to allow for HW decoding"
-    },
-    {
-      "name": "osd-level",
-      "default": "1",
-      "description": "OSD verbosity level"
-    },
-    {
-      "name": "osd-font-size",
-      "default": "28",
-      "description": "Font size for OSD"
-    },
-    {
-      "name": "osd-duration",
-      "default": "2000",
-      "description": "Duration messages stay"
-    },
-    {
-      "name": "osc",
-      "default": "yes",
-      "description": "On-screen controller"
-    },
-    {
-      "name": "screenshot-format",
-      "default": "png",
-      "description": "Screenshot format"
-    },
-    {
-      "name": "screenshot-directory",
-      "default": "~",
-      "description": "Screenshot folder"
-    },
-    {
-      "name": "screenshot-template",
-      "default": "%F_%P",
-      "description": "File naming template"
-    },
-    {
-      "name": "ytdl-raw-options",
-      "default": "",
-      "description": "Prevent YouTube auto-generated subtitles"
-    }
+    { "name": "vo", "default": "gpu", "description": "Video output driver" },
+    { "name": "profile", "default": "gpu-hq", "description": "Preset video options" },
+    { "name": "scale", "default": "ewa_lanczossharp", "description": "Upscaling filter" },
+    { "name": "cscale", "default": "ewa_lanczossharp", "description": "Chroma upscaling" },
+    { "name": "dscale", "default": "mitchell", "description": "Downscaling filter" },
+    { "name": "interpolation", "default": "no", "description": "Enable frame interpolation" },
+    { "name": "tscale", "default": "oversample", "description": "Temporal scaling" },
+    { "name": "video-sync", "default": "display-resample", "description": "Audio/video sync method" },
+    { "name": "deband", "default": "no", "description": "Apply debanding filter" },
+    { "name": "audio-device", "default": "auto", "description": "Audio output device" },
+    { "name": "volume", "default": "100", "description": "Default volume" },
+    { "name": "audio-channels", "default": "stereo", "description": "Audio channel layout" },
+    { "name": "audio-delay", "default": "0", "description": "Audio delay in seconds" },
+    { "name": "audio-normalize-downmix", "default": "yes", "description": "Normalize volume on downmix" },
+    { "name": "sub-visibility", "default": "yes", "description": "Enable subtitles" },
+    { "name": "sub-auto", "default": "fuzzy", "description": "Auto-load subtitle files" },
+    { "name": "sid", "default": "0", "description": "Subtitle track selection ('0' = first track)" },
+    { "name": "slang", "default": "", "description": "Preferred subtitle language" },
+    { "name": "sub-font", "default": "Sans", "description": "Subtitle font" },
+    { "name": "sub-font-size", "default": "36", "description": "Subtitle font size" },
+    { "name": "sub-color", "default": "#FFFFFF", "description": "Subtitle colour" },
+    { "name": "resume-playback", "default": "no", "description": "Resume last position" },
+    { "name": "save-position-on-quit", "default": "no", "description": "Save position when quitting" },
+    { "name": "loop-file", "default": "no", "description": "Loop current file" },
+    { "name": "keep-open", "default": "no", "description": "Keep window open after playback ends" },
+    { "name": "autofit-larger", "default": "100%x100%", "description": "Resize window automatically" },
+    { "name": "cache", "default": "yes", "description": "Enable input/network cache" },
+    { "name": "cache-secs", "default": "10", "description": "Cache duration" },
+    { "name": "demuxer-max-bytes", "default": "128MiB", "description": "Max buffer for demuxer" },
+    { "name": "hwdec", "default": "auto-safe", "description": "Hardware decoding mode" },
+    { "name": "hwdec-codecs", "default": "all", "description": "Which codecs to allow for HW decoding" },
+    { "name": "osd-level", "default": "1", "description": "OSD verbosity level" },
+    { "name": "osd-font-size", "default": "28", "description": "Font size for OSD" },
+    { "name": "osd-duration", "default": "2000", "description": "Duration messages stay" },
+    { "name": "osc", "default": "yes", "description": "On-screen controller" },
+    { "name": "screenshot-format", "default": "png", "description": "Screenshot format" },
+    { "name": "screenshot-directory", "default": "~", "description": "Screenshot folder" },
+    { "name": "screenshot-template", "default": ""%F_%P"", "description": "File naming template (quotes needed)" },
+    { "name": "ytdl-raw-options", "default": "", "description": "Prevent YouTube auto-generated subtitles" }
   ]
 }
