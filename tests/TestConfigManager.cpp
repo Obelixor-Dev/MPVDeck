@@ -8,6 +8,8 @@
 
 using ConfigMap = QMap<QString, QString>;
 Q_DECLARE_METATYPE(ConfigMap)
+Q_DECLARE_METATYPE(ConfigManager::ConfigLine)
+Q_DECLARE_METATYPE(ConfigManager::ConfigLineType)
 
 class TestConfigManager : public QObject {
   Q_OBJECT
@@ -18,6 +20,10 @@ private slots:
   void testReadConfigFile();
   void testSaveConfigFile_data();
   void testSaveConfigFile();
+  void testParseLine_data();
+  void testParseLine();
+  void testSerializeLine_data();
+  void testSerializeLine();
 
 private:
   QString m_tempConfigPath;
@@ -43,6 +49,74 @@ void TestConfigManager::cleanupTempConfigFile() {
 }
 
 void TestConfigManager::initTestCase() {}
+
+void TestConfigManager::testParseLine_data() {
+  QTest::addColumn<QString>("line");
+  QTest::addColumn<ConfigManager::ConfigLineType>("expectedType");
+  QTest::addColumn<QString>("expectedKey");
+  QTest::addColumn<QString>("expectedValue");
+
+  QTest::newRow("key=value") << "key=value" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "value";
+  QTest::newRow("key = value") << "key = value" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "value";
+  QTest::newRow("key=value # comment") << "key=value # comment" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "value";
+  QTest::newRow("key") << "key" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "";
+  QTest::newRow("key # comment") << "key # comment" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "";
+  QTest::newRow("# comment only") << "# comment only" << ConfigManager::ConfigLineType::Comment << "" << "";
+  QTest::newRow("empty line") << "" << ConfigManager::ConfigLineType::EmptyLine << "" << "";
+  QTest::newRow("key=\"value with spaces\"") << "key=\"value with spaces\"" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "value with spaces";
+  QTest::newRow("key=\"value with # comment\"") << "key=\"value with # comment\"" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "value with # comment";
+  QTest::newRow("key=value with spaces") << "key=value with spaces" << ConfigManager::ConfigLineType::KeyValuePair << "key" << "value with spaces";
+}
+
+void TestConfigManager::testParseLine() {
+  QFETCH(QString, line);
+  QFETCH(ConfigManager::ConfigLineType, expectedType);
+  QFETCH(QString, expectedKey);
+  QFETCH(QString, expectedValue);
+
+  ConfigManager configManager; // ConfigManager instance is needed to call parseLine
+  ConfigManager::ConfigLine actualLine = configManager.parseLine(line);
+
+  QCOMPARE(actualLine.type, expectedType);
+  QCOMPARE(actualLine.key, expectedKey);
+  QCOMPARE(actualLine.value, expectedValue);
+}
+
+void TestConfigManager::testSerializeLine_data() {
+  QTest::addColumn<ConfigManager::ConfigLine>("line");
+  QTest::addColumn<QString>("expectedLine");
+
+  ConfigManager::ConfigLine line1 = {ConfigManager::ConfigLineType::KeyValuePair, "key", "value", ""};
+  QTest::newRow("key=value") << line1 << "key=value";
+
+  ConfigManager::ConfigLine line2 = {ConfigManager::ConfigLineType::KeyValuePair, "key", "", ""};
+  QTest::newRow("key") << line2 << "key";
+
+  ConfigManager::ConfigLine line3 = {ConfigManager::ConfigLineType::KeyValuePair, "key", "value with spaces", ""};
+  QTest::newRow("key=value with spaces") << line3 << "key=\"value with spaces\"";
+
+  ConfigManager::ConfigLine line4 = {ConfigManager::ConfigLineType::KeyValuePair, "key", "value with \"quotes\"", ""};
+  QTest::newRow("key=\"value with quotes\"") << line4 << "key=\"value with \"quotes\"\"";
+
+  ConfigManager::ConfigLine line5 = {ConfigManager::ConfigLineType::KeyValuePair, "key", "value with # comment", ""};
+  QTest::newRow("key=value with # comment") << line5 << "key=\"value with # comment\"";
+
+  ConfigManager::ConfigLine line6 = {ConfigManager::ConfigLineType::Comment, "", "", "# a comment"};
+  QTest::newRow("comment only") << line6 << "# a comment";
+
+  ConfigManager::ConfigLine line7 = {ConfigManager::ConfigLineType::EmptyLine, "", "", ""};
+  QTest::newRow("empty line") << line7 << "";
+}
+
+void TestConfigManager::testSerializeLine() {
+  QFETCH(ConfigManager::ConfigLine, line);
+  QFETCH(QString, expectedLine);
+
+  ConfigManager configManager; // ConfigManager instance is needed to call serializeLine
+  QString actualLine = configManager.serializeLine(line);
+
+  QCOMPARE(actualLine, expectedLine);
+}
 
 void TestConfigManager::testReadConfigFile_data() {
   QTest::addColumn<QString>("fileContent");

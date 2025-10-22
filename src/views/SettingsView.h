@@ -26,25 +26,25 @@ public:
   SettingsView &operator=(SettingsView &&) = delete;
 
 private slots:
-  void onSaveButtonClicked();
-  void onSettingsSaved(bool success);
-  void onRevertButtonClicked();
-  void onLoadDefaultsButtonClicked();
-  void updateSaveButtonState(bool isDirty);
+  auto onSaveButtonClicked() -> void;
+  auto onSettingsSaved(bool success) -> void;
+  auto onRevertButtonClicked() -> void;
+  auto onLoadDefaultsButtonClicked() -> void;
+  auto updateSaveButtonState(bool isDirty) -> void;
 
-private:
+private: // NOLINT(readability-redundant-access-specifiers)
   QMenu *m_fileMenu;
-  void setupMenuBar();
+  auto setupMenuBar() -> void;
 
-  QWidget *createAudioTab();
-  QWidget *createVideoTab();
-  QWidget *createSubtitlesTab();
-  QWidget *createPlaybackTab();
-  QWidget *createPerformanceTab();
-  QWidget *createInterfaceTab();
-  QWidget *createRawConfigTab();
-  void refreshRawEditor(QPlainTextEdit *textEdit);
-  void applyRawConfig(const QString &configText);
+  auto createAudioTab() -> QWidget *;
+  auto createVideoTab() -> QWidget *;
+  auto createSubtitlesTab() -> QWidget *;
+  auto createPlaybackTab() -> QWidget *;
+  auto createPerformanceTab() -> QWidget *;
+  auto createInterfaceTab() -> QWidget *;
+  auto createRawConfigTab() -> QWidget *;
+  auto refreshRawEditor(QPlainTextEdit *textEdit) -> void;
+  auto applyRawConfig(const QString &configText) -> void;
 
   SettingsViewModel *m_viewModel;
   QTabWidget *m_tabWidget;
@@ -53,8 +53,9 @@ private:
   QPushButton *m_saveButton;
   QPushButton *m_revertButton;
 
-  void filterTabs(const QString &searchText);
-  bool searchWidgets(QWidget *parentWidget, const QString &searchText);
+  auto filterTabs(const QString &searchText) -> void;
+  auto searchWidgets(QWidget *parentWidget, const QString &searchText) -> bool;
+  static bool widgetContainsText(QWidget *widget, const QString &searchText);
 };
 
 #endif // MPVDECK_SETTINGSVIEW_H

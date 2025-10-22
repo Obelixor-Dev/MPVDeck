@@ -16,6 +16,22 @@
 #include <QMap>
 #include <QObject>
 #include <QString>
+#include <functional> // For std::function
+
+// Forward declarations
+class ConfigManager;
+class AudioViewModel;
+class VideoViewModel;
+class SubtitleViewModel;
+class PlaybackBehaviorViewModel;
+class PerformanceCachingViewModel;
+class InterfaceOsdViewModel;
+
+struct OptionBinding {
+  QString key;
+  std::function<void(const QString &)> setter;
+  std::function<QString()> getter;
+};
 
 class SettingsViewModel : public QObject {
   Q_OBJECT
@@ -40,11 +56,11 @@ public:
   void loadSettings();
   void saveSettings();
   void loadDefaults();
-  QMap<QString, QString> parseDefaultSettings();
-  QMap<QString, QString> parseOptionDescriptions();
-  QString getRawConfig();
+  static auto parseDefaultSettings() -> QMap<QString, QString>;
+  static auto parseOptionDescriptions() -> QMap<QString, QString>;
+  auto getRawConfig() -> QString;
   void applyRawConfig(const QString &configText);
-  QString getOptionDescription(const QString &optionName);
+  static auto getOptionDescription(const QString &optionName) -> QString;
 
   [[nodiscard]] auto settings() const -> QMap<QString, QString>;
   [[nodiscard]] auto audioViewModel() const
@@ -60,12 +76,14 @@ public:
           *; // Getter for PerformanceCachingViewModel
   [[nodiscard]] auto interfaceOsdViewModel() const
       -> InterfaceOsdViewModel *; // Getter for InterfaceOsdViewModel
-  [[nodiscard]] bool autoReloadRawConfig() const;
+  [[nodiscard]] auto autoReloadRawConfig() const -> bool;
   void setAutoReloadRawConfig(bool autoReloadRawConfig);
-  [[nodiscard]] bool isDirty() const;
+  [[nodiscard]] auto isDirty() const -> bool;
 
-public slots:
+public slots: // NOLINT(readability-redundant-access-specifiers)
   void setIsDirty(bool dirty);
+
+  static auto loadDefaultsJson() -> QJsonDocument;
 
 signals:
   void settingsSaved(bool success);

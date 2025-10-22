@@ -6,11 +6,13 @@
 namespace MPVDeck {
 
 struct ConfigResult {
-    bool success;
-    QString errorMessage;
+  bool success;
+  QString errorMessage;
 
-    static ConfigResult successResult() { return {true, ""}; }
-    static ConfigResult failureResult(const QString &message) { return {false, message}; }
+  static auto successResult() -> ConfigResult { return {.success = true, .errorMessage = ""}; }
+  static auto failureResult(const QString &message) -> ConfigResult {
+    return {.success = false, .errorMessage = message};
+  }
 };
 
 } // namespace MPVDeck

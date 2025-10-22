@@ -21,6 +21,7 @@ private slots:
     void testLoadDefaults();
     void testLoadSettings();
     void testSaveSettings();
+    void testRoundTrip();
 
 private:
     ConfigManager* m_configManager;
@@ -108,6 +109,36 @@ void TestSettingsViewModel::testSaveSettings()
     QVERIFY(content.contains("volume=75"));
     QVERIFY(content.contains("profile=gpu"));
     QVERIFY(content.contains("sub-font-size=40"));
+}
+
+void TestSettingsViewModel::testRoundTrip()
+{
+    // 1. Load defaults
+    m_settingsViewModel->loadDefaults();
+
+    // 2. Change some settings
+    m_settingsViewModel->audioViewModel()->setVolume(150);
+    m_settingsViewModel->videoViewModel()->setVideoProfile("high-quality");
+    m_settingsViewModel->subtitleViewModel()->setSubtitleFontSize(50);
+
+    // 3. Save settings
+    m_settingsViewModel->saveSettings();
+
+    // 4. Create a new SettingsViewModel to simulate a fresh load
+    ConfigManager* newConfigManager = new ConfigManager(m_tempConfigPath);
+    SettingsViewModel* newSettingsViewModel = new SettingsViewModel(newConfigManager, nullptr);
+
+    // 5. Load settings into the new ViewModel
+    newSettingsViewModel->loadSettings();
+
+    // 6. Verify the settings in the new ViewModel
+    QCOMPARE(newSettingsViewModel->audioViewModel()->volume(), 150);
+    QCOMPARE(newSettingsViewModel->videoViewModel()->videoProfile(), QString("high-quality"));
+    QCOMPARE(newSettingsViewModel->subtitleViewModel()->subtitleFontSize(), 50);
+
+    // Clean up new ViewModel and ConfigManager
+    delete newSettingsViewModel;
+    delete newConfigManager;
 }
 
 QTEST_MAIN(TestSettingsViewModel)

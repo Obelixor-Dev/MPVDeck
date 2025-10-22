@@ -3,6 +3,7 @@
 #include "../models/ConfigManager.h"
 #include "../viewmodels/SettingsViewModel.h"
 #include <QCheckBox>
+#include <QCloseEvent>
 #include <QColorDialog>
 #include <QComboBox>
 #include <QDebug>
@@ -19,6 +20,7 @@
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QSettings>
 #include <QSlider>
 #include <QSpinBox>
 #include <QStandardItemModel>
@@ -27,14 +29,15 @@
 #include <QTextStream>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QSettings>
-#include <QCloseEvent>
+#include <ranges>
+#include <numeric>
 
 using namespace MPVDeck::Constants;
 
 SettingsView::SettingsView(SettingsViewModel *viewModel, QWidget *parent)
     : QMainWindow(parent), m_viewModel(viewModel),
-      m_tabWidget(new QTabWidget(this)) {
+      m_tabWidget(new QTabWidget(this)), m_fileMenu(nullptr), m_rawConfigEditor(nullptr),
+      m_searchEdit(new QLineEdit(this)) {
 
   m_tabWidget->addTab(createAudioTab(), "Audio");
   m_tabWidget->addTab(createVideoTab(), "Video");
@@ -83,7 +86,6 @@ SettingsView::SettingsView(SettingsViewModel *viewModel, QWidget *parent)
   auto *centralWidget = new QWidget(this);
   auto *mainLayout = new QVBoxLayout(centralWidget);
 
-  m_searchEdit = new QLineEdit(this);
   m_searchEdit->setPlaceholderText("🔍 Search settings...");
   connect(m_searchEdit, &QLineEdit::textChanged, this,
           &SettingsView::filterTabs);
@@ -110,14 +112,14 @@ void SettingsView::onLoadDefaultsButtonClicked() {
   m_viewModel->loadDefaults();
 }
 
-QWidget *SettingsView::createAudioTab() {
+auto SettingsView::createAudioTab() -> QWidget * {
   auto *audioTab = new QWidget(m_tabWidget);
   auto *audioLayout = new QVBoxLayout(audioTab);
 
   // Mute checkbox
   auto *muteCheckBox = new QCheckBox("Mute", this);
   muteCheckBox->setChecked(m_viewModel->audioViewModel()->mute());
-  muteCheckBox->setToolTip(m_viewModel->getOptionDescription("mute"));
+  muteCheckBox->setToolTip(SettingsViewModel::getOptionDescription("mute"));
   connect(muteCheckBox, &QCheckBox::toggled, m_viewModel->audioViewModel(),
           &AudioViewModel::setMute);
   connect(m_viewModel->audioViewModel(), &AudioViewModel::muteChanged,
@@ -130,7 +132,7 @@ QWidget *SettingsView::createAudioTab() {
   auto *volumeSlider = new QSlider(Qt::Horizontal, this);
   volumeSlider->setRange(0, MPVDeck::Constants::MAX_VOLUME);
   volumeSlider->setValue(m_viewModel->audioViewModel()->volume());
-  volumeSlider->setToolTip(m_viewModel->getOptionDescription("volume"));
+  volumeSlider->setToolTip(SettingsViewModel::getOptionDescription("volume"));
   auto *volumeValueLabel = new QLabel(
       QString::number(m_viewModel->audioViewModel()->volume()), this);
   connect(volumeSlider, &QSlider::valueChanged, m_viewModel->audioViewModel(),
@@ -152,7 +154,7 @@ QWidget *SettingsView::createAudioTab() {
   audioDeviceComboBox->setCurrentText(
       m_viewModel->audioViewModel()->audioDevice());
   audioDeviceComboBox->setToolTip(
-      m_viewModel->getOptionDescription("audio-device"));
+      SettingsViewModel::getOptionDescription("audio-device"));
   connect(audioDeviceComboBox, &QComboBox::currentTextChanged,
           m_viewModel->audioViewModel(), &AudioViewModel::setAudioDevice);
   connect(m_viewModel->audioViewModel(), &AudioViewModel::audioDeviceChanged,
@@ -167,7 +169,7 @@ QWidget *SettingsView::createAudioTab() {
   audioNormalizeDownmixCheckBox->setChecked(
       m_viewModel->audioViewModel()->audioNormalizeDownmix());
   audioNormalizeDownmixCheckBox->setToolTip(
-      m_viewModel->getOptionDescription("audio-normalize-downmix"));
+      SettingsViewModel::getOptionDescription("audio-normalize-downmix"));
   connect(audioNormalizeDownmixCheckBox, &QCheckBox::toggled,
           m_viewModel->audioViewModel(),
           &AudioViewModel::setAudioNormalizeDownmix);
@@ -184,7 +186,7 @@ QWidget *SettingsView::createAudioTab() {
   audioChannelsComboBox->setCurrentText(
       m_viewModel->audioViewModel()->audioChannels());
   audioChannelsComboBox->setToolTip(
-      m_viewModel->getOptionDescription("audio-channels"));
+      SettingsViewModel::getOptionDescription("audio-channels"));
   connect(audioChannelsComboBox, &QComboBox::currentTextChanged,
           m_viewModel->audioViewModel(), &AudioViewModel::setAudioChannels);
   connect(m_viewModel->audioViewModel(), &AudioViewModel::audioChannelsChanged,
@@ -201,7 +203,7 @@ QWidget *SettingsView::createAudioTab() {
   audioDelaySpinBox->setSingleStep(MPVDeck::Constants::AUDIO_DELAY_SINGLE_STEP);
   audioDelaySpinBox->setValue(m_viewModel->audioViewModel()->audioDelay());
   audioDelaySpinBox->setToolTip(
-      m_viewModel->getOptionDescription("audio-delay"));
+      SettingsViewModel::getOptionDescription("audio-delay"));
   connect(audioDelaySpinBox,
           static_cast<void (QDoubleSpinBox::*)(double)>(
               &QDoubleSpinBox::valueChanged),
@@ -215,7 +217,7 @@ QWidget *SettingsView::createAudioTab() {
   return audioTab;
 }
 
-QWidget *SettingsView::createVideoTab() {
+auto SettingsView::createVideoTab() -> QWidget * {
   auto *videoTab = new QWidget(m_tabWidget);
   auto *videoLayout = new QVBoxLayout(videoTab);
 
@@ -227,7 +229,7 @@ QWidget *SettingsView::createVideoTab() {
       {"gpu-hq", "gpu", "low-latency", "lavfi-complex", "default"});
   profileComboBox->setCurrentText(
       m_viewModel->videoViewModel()->videoProfile());
-  profileComboBox->setToolTip(m_viewModel->getOptionDescription("profile"));
+  profileComboBox->setToolTip(SettingsViewModel::getOptionDescription("profile"));
   connect(profileComboBox, &QComboBox::currentTextChanged,
           m_viewModel->videoViewModel(), &VideoViewModel::setVideoProfile);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoProfileChanged,
@@ -243,7 +245,7 @@ QWidget *SettingsView::createVideoTab() {
   scaleComboBox->addItems(
       {"bilinear", "bicubic", "lanczos", "ewa_lanczossharp", "spline36"});
   scaleComboBox->setCurrentText(m_viewModel->videoViewModel()->videoScale());
-  scaleComboBox->setToolTip(m_viewModel->getOptionDescription("scale"));
+  scaleComboBox->setToolTip(SettingsViewModel::getOptionDescription("scale"));
   connect(scaleComboBox, &QComboBox::currentTextChanged,
           m_viewModel->videoViewModel(), &VideoViewModel::setVideoScale);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoScaleChanged,
@@ -255,7 +257,7 @@ QWidget *SettingsView::createVideoTab() {
   // Deband
   auto *debandCheckBox = new QCheckBox("Deband", this);
   debandCheckBox->setChecked(m_viewModel->videoViewModel()->videoDeband());
-  debandCheckBox->setToolTip(m_viewModel->getOptionDescription("deband"));
+  debandCheckBox->setToolTip(SettingsViewModel::getOptionDescription("deband"));
   connect(debandCheckBox, &QCheckBox::toggled, m_viewModel->videoViewModel(),
           &VideoViewModel::setVideoDeband);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoDebandChanged,
@@ -268,7 +270,7 @@ QWidget *SettingsView::createVideoTab() {
   auto *voComboBox = new QComboBox(this);
   voComboBox->addItems({"gpu", "gpu-next", "x11", "xv", "opengl", "sdl"});
   voComboBox->setCurrentText(m_viewModel->videoViewModel()->videoVo());
-  voComboBox->setToolTip(m_viewModel->getOptionDescription("vo"));
+  voComboBox->setToolTip(SettingsViewModel::getOptionDescription("vo"));
   connect(voComboBox, &QComboBox::currentTextChanged,
           m_viewModel->videoViewModel(), &VideoViewModel::setVideoVo);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoVoChanged,
@@ -284,7 +286,7 @@ QWidget *SettingsView::createVideoTab() {
   cscaleComboBox->addItems({"bilinear", "bicubic", "lanczos",
                             "ewa_lanczossharp", "spline36"}); // Example values
   cscaleComboBox->setCurrentText(m_viewModel->videoViewModel()->videoCscale());
-  cscaleComboBox->setToolTip(m_viewModel->getOptionDescription("cscale"));
+  cscaleComboBox->setToolTip(SettingsViewModel::getOptionDescription("cscale"));
   connect(cscaleComboBox, &QComboBox::currentTextChanged,
           m_viewModel->videoViewModel(), &VideoViewModel::setVideoCscale);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoCscaleChanged,
@@ -300,7 +302,7 @@ QWidget *SettingsView::createVideoTab() {
   dscaleComboBox->addItems(
       {"bilinear", "bicubic", "lanczos", "mitchell"}); // Example values
   dscaleComboBox->setCurrentText(m_viewModel->videoViewModel()->videoDscale());
-  dscaleComboBox->setToolTip(m_viewModel->getOptionDescription("dscale"));
+  dscaleComboBox->setToolTip(SettingsViewModel::getOptionDescription("dscale"));
   connect(dscaleComboBox, &QComboBox::currentTextChanged,
           m_viewModel->videoViewModel(), &VideoViewModel::setVideoDscale);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoDscaleChanged,
@@ -314,7 +316,7 @@ QWidget *SettingsView::createVideoTab() {
   interpolationCheckBox->setChecked(
       m_viewModel->videoViewModel()->videoInterpolation());
   interpolationCheckBox->setToolTip(
-      m_viewModel->getOptionDescription("interpolation"));
+      SettingsViewModel::getOptionDescription("interpolation"));
   connect(interpolationCheckBox, &QCheckBox::toggled,
           m_viewModel->videoViewModel(),
           &VideoViewModel::setVideoInterpolation);
@@ -329,7 +331,7 @@ QWidget *SettingsView::createVideoTab() {
   auto *tscaleComboBox = new QComboBox(this);
   tscaleComboBox->addItems({"oversample", "linear", "nearest"});
   tscaleComboBox->setCurrentText(m_viewModel->videoViewModel()->videoTscale());
-  tscaleComboBox->setToolTip(m_viewModel->getOptionDescription("tscale"));
+  tscaleComboBox->setToolTip(SettingsViewModel::getOptionDescription("tscale"));
   connect(tscaleComboBox, &QComboBox::currentTextChanged,
           m_viewModel->videoViewModel(), &VideoViewModel::setVideoTscale);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoTscaleChanged,
@@ -346,7 +348,7 @@ QWidget *SettingsView::createVideoTab() {
   videoSyncComboBox->setCurrentText(
       m_viewModel->videoViewModel()->videoVideoSync());
   videoSyncComboBox->setToolTip(
-      m_viewModel->getOptionDescription("video-sync"));
+      SettingsViewModel::getOptionDescription("video-sync"));
   connect(videoSyncComboBox, &QComboBox::currentTextChanged,
           m_viewModel->videoViewModel(), &VideoViewModel::setVideoVideoSync);
   connect(m_viewModel->videoViewModel(), &VideoViewModel::videoVideoSyncChanged,
@@ -358,7 +360,7 @@ QWidget *SettingsView::createVideoTab() {
   return videoTab;
 }
 
-QWidget *SettingsView::createSubtitlesTab() {
+auto SettingsView::createSubtitlesTab() -> QWidget * {
   auto *subtitlesTab = new QWidget(m_tabWidget);
   auto *subtitlesLayout = new QVBoxLayout(subtitlesTab);
 
@@ -367,7 +369,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   subVisibilityCheckBox->setChecked(
       m_viewModel->subtitleViewModel()->subtitleVisibility());
   subVisibilityCheckBox->setToolTip(
-      m_viewModel->getOptionDescription("sub-visibility"));
+      SettingsViewModel::getOptionDescription("sub-visibility"));
   connect(subVisibilityCheckBox, &QCheckBox::toggled,
           m_viewModel->subtitleViewModel(),
           &SubtitleViewModel::setSubtitleVisibility);
@@ -384,7 +386,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   subFontSizeSpinBox->setValue(
       m_viewModel->subtitleViewModel()->subtitleFontSize());
   subFontSizeSpinBox->setToolTip(
-      m_viewModel->getOptionDescription("sub-font-size"));
+      SettingsViewModel::getOptionDescription("sub-font-size"));
   connect(subFontSizeSpinBox,
           static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
           m_viewModel->subtitleViewModel(),
@@ -401,9 +403,9 @@ QWidget *SettingsView::createSubtitlesTab() {
   auto *subColorLabel = new QLabel("Color:", this);
   auto *subColorLineEdit =
       new QLineEdit(m_viewModel->subtitleViewModel()->subtitleColor(), this);
-  subColorLineEdit->setToolTip(m_viewModel->getOptionDescription("sub-color"));
+  subColorLineEdit->setToolTip(SettingsViewModel::getOptionDescription("sub-color"));
   auto *subColorButton = new QPushButton("Pick Color", this);
-  connect(subColorButton, &QPushButton::clicked, [this, subColorLineEdit]() {
+  connect(subColorButton, &QPushButton::clicked, [this, subColorLineEdit]() -> void {
     QColor color = QColorDialog::getColor(
         QColor(m_viewModel->subtitleViewModel()->subtitleColor()), this,
         "Pick a color");
@@ -427,7 +429,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   auto *slangLabel = new QLabel("Subtitle Languages:", this);
   auto *slangLineEdit = new QLineEdit(
       m_viewModel->subtitleViewModel()->subtitleLanguages(), this);
-  slangLineEdit->setToolTip(m_viewModel->getOptionDescription("slang"));
+  slangLineEdit->setToolTip(SettingsViewModel::getOptionDescription("slang"));
   connect(slangLineEdit, &QLineEdit::textChanged,
           m_viewModel->subtitleViewModel(),
           &SubtitleViewModel::setSubtitleLanguages);
@@ -444,7 +446,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   auto *subAutoComboBox = new QComboBox(this);
   subAutoComboBox->addItems({"no", "fuzzy", "exact"});
   subAutoComboBox->setCurrentText(m_viewModel->subtitleViewModel()->subAuto());
-  subAutoComboBox->setToolTip(m_viewModel->getOptionDescription("sub-auto"));
+  subAutoComboBox->setToolTip(SettingsViewModel::getOptionDescription("sub-auto"));
   connect(subAutoComboBox, &QComboBox::currentTextChanged,
           m_viewModel->subtitleViewModel(), &SubtitleViewModel::setSubAuto);
   connect(m_viewModel->subtitleViewModel(), &SubtitleViewModel::subAutoChanged,
@@ -458,7 +460,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   auto *sidLabel = new QLabel("Subtitle ID:", this);
   auto *sidLineEdit =
       new QLineEdit(m_viewModel->subtitleViewModel()->sid(), this);
-  sidLineEdit->setToolTip(m_viewModel->getOptionDescription("sid"));
+  sidLineEdit->setToolTip(SettingsViewModel::getOptionDescription("sid"));
   connect(sidLineEdit, &QLineEdit::textChanged,
           m_viewModel->subtitleViewModel(), &SubtitleViewModel::setSid);
   connect(m_viewModel->subtitleViewModel(), &SubtitleViewModel::sidChanged,
@@ -473,7 +475,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   subForcedOnlyCheckBox->setChecked(
       m_viewModel->subtitleViewModel()->subForcedOnly());
   subForcedOnlyCheckBox->setToolTip(
-      m_viewModel->getOptionDescription("sub-forced-only"));
+      SettingsViewModel::getOptionDescription("sub-forced-only"));
   connect(subForcedOnlyCheckBox, &QCheckBox::toggled,
           m_viewModel->subtitleViewModel(),
           &SubtitleViewModel::setSubForcedOnly);
@@ -487,7 +489,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   auto *subFontLabel = new QLabel("Subtitle Font:", this);
   auto *subFontLineEdit =
       new QLineEdit(m_viewModel->subtitleViewModel()->subFont(), this);
-  subFontLineEdit->setToolTip(m_viewModel->getOptionDescription("sub-font"));
+  subFontLineEdit->setToolTip(SettingsViewModel::getOptionDescription("sub-font"));
   connect(subFontLineEdit, &QLineEdit::textChanged,
           m_viewModel->subtitleViewModel(), &SubtitleViewModel::setSubFont);
   connect(m_viewModel->subtitleViewModel(), &SubtitleViewModel::subFontChanged,
@@ -499,7 +501,7 @@ QWidget *SettingsView::createSubtitlesTab() {
   return subtitlesTab;
 }
 
-QWidget *SettingsView::createPlaybackTab() {
+auto SettingsView::createPlaybackTab() -> QWidget * {
   auto *playbackTab = new QWidget(m_tabWidget);
   auto *playbackLayout = new QVBoxLayout(playbackTab);
 
@@ -508,7 +510,7 @@ QWidget *SettingsView::createPlaybackTab() {
   resumePlaybackCheckBox->setChecked(
       m_viewModel->playbackBehaviorViewModel()->resumePlayback());
   resumePlaybackCheckBox->setToolTip(
-      m_viewModel->getOptionDescription("resume-playback"));
+      SettingsViewModel::getOptionDescription("resume-playback"));
   connect(resumePlaybackCheckBox, &QCheckBox::toggled,
           m_viewModel->playbackBehaviorViewModel(),
           &PlaybackBehaviorViewModel::setResumePlayback);
@@ -523,7 +525,7 @@ QWidget *SettingsView::createPlaybackTab() {
   savePositionOnQuitCheckBox->setChecked(
       m_viewModel->playbackBehaviorViewModel()->savePositionOnQuit());
   savePositionOnQuitCheckBox->setToolTip(
-      m_viewModel->getOptionDescription("save-position-on-quit"));
+      SettingsViewModel::getOptionDescription("save-position-on-quit"));
   connect(savePositionOnQuitCheckBox, &QCheckBox::toggled,
           m_viewModel->playbackBehaviorViewModel(),
           &PlaybackBehaviorViewModel::setSavePositionOnQuit);
@@ -539,7 +541,7 @@ QWidget *SettingsView::createPlaybackTab() {
   loopFileComboBox->addItems({"no", "yes", "inf"});
   loopFileComboBox->setCurrentText(
       m_viewModel->playbackBehaviorViewModel()->loopFile());
-  loopFileComboBox->setToolTip(m_viewModel->getOptionDescription("loop-file"));
+  loopFileComboBox->setToolTip(SettingsViewModel::getOptionDescription("loop-file"));
   connect(loopFileComboBox, &QComboBox::currentTextChanged,
           m_viewModel->playbackBehaviorViewModel(),
           &PlaybackBehaviorViewModel::setLoopFile);
@@ -557,7 +559,7 @@ QWidget *SettingsView::createPlaybackTab() {
   keepOpenComboBox->addItems({"no", "yes", "always"});
   keepOpenComboBox->setCurrentText(
       m_viewModel->playbackBehaviorViewModel()->keepOpen());
-  keepOpenComboBox->setToolTip(m_viewModel->getOptionDescription("keep-open"));
+  keepOpenComboBox->setToolTip(SettingsViewModel::getOptionDescription("keep-open"));
   connect(keepOpenComboBox, &QComboBox::currentTextChanged,
           m_viewModel->playbackBehaviorViewModel(),
           &PlaybackBehaviorViewModel::setKeepOpen);
@@ -574,7 +576,7 @@ QWidget *SettingsView::createPlaybackTab() {
   auto *autofitLargerLineEdit = new QLineEdit(
       m_viewModel->playbackBehaviorViewModel()->autofitLarger(), this);
   autofitLargerLineEdit->setToolTip(
-      m_viewModel->getOptionDescription("autofit-larger"));
+      SettingsViewModel::getOptionDescription("autofit-larger"));
   connect(autofitLargerLineEdit, &QLineEdit::textChanged,
           m_viewModel->playbackBehaviorViewModel(),
           &PlaybackBehaviorViewModel::setAutofitLarger);
@@ -591,7 +593,7 @@ QWidget *SettingsView::createPlaybackTab() {
   auto *ytdlRawOptionsLineEdit = new QLineEdit(
       m_viewModel->playbackBehaviorViewModel()->ytdlRawOptions(), this);
   ytdlRawOptionsLineEdit->setToolTip(
-      m_viewModel->getOptionDescription("ytdl-raw-options"));
+      SettingsViewModel::getOptionDescription("ytdl-raw-options"));
   connect(ytdlRawOptionsLineEdit, &QLineEdit::textChanged,
           m_viewModel->playbackBehaviorViewModel(),
           &PlaybackBehaviorViewModel::setYtdlRawOptions);
@@ -605,7 +607,7 @@ QWidget *SettingsView::createPlaybackTab() {
   return playbackTab;
 }
 
-QWidget *SettingsView::createPerformanceTab() {
+auto SettingsView::createPerformanceTab() -> QWidget * {
   auto *performanceTab = new QWidget(m_tabWidget);
   auto *performanceLayout = new QVBoxLayout(performanceTab);
 
@@ -613,7 +615,7 @@ QWidget *SettingsView::createPerformanceTab() {
   auto *cacheCheckBox = new QCheckBox("Enable Cache", this);
   cacheCheckBox->setChecked(
       m_viewModel->performanceCachingViewModel()->cache());
-  cacheCheckBox->setToolTip(m_viewModel->getOptionDescription("cache"));
+  cacheCheckBox->setToolTip(SettingsViewModel::getOptionDescription("cache"));
   connect(cacheCheckBox, &QCheckBox::toggled,
           m_viewModel->performanceCachingViewModel(),
           &PerformanceCachingViewModel::setCache);
@@ -626,10 +628,11 @@ QWidget *SettingsView::createPerformanceTab() {
   auto *cacheSecsLayout = new QHBoxLayout();
   auto *cacheSecsLabel = new QLabel("Cache Duration (seconds):", this);
   auto *cacheSecsSpinBox = new QSpinBox(this);
-  cacheSecsSpinBox->setRange(0, MPVDeck::Constants::MAX_CACHE_SECS); // Example range, 0 to 10 minutes
+  cacheSecsSpinBox->setRange(
+      0, MPVDeck::Constants::MAX_CACHE_SECS); // Example range, 0 to 10 minutes
   cacheSecsSpinBox->setValue(
       m_viewModel->performanceCachingViewModel()->cacheSecs());
-  cacheSecsSpinBox->setToolTip(m_viewModel->getOptionDescription("cache-secs"));
+  cacheSecsSpinBox->setToolTip(SettingsViewModel::getOptionDescription("cache-secs"));
   connect(cacheSecsSpinBox,
           static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
           m_viewModel->performanceCachingViewModel(),
@@ -647,7 +650,7 @@ QWidget *SettingsView::createPerformanceTab() {
   auto *demuxerMaxBytesLineEdit = new QLineEdit(
       m_viewModel->performanceCachingViewModel()->demuxerMaxBytes(), this);
   demuxerMaxBytesLineEdit->setToolTip(
-      m_viewModel->getOptionDescription("demuxer-max-bytes"));
+      SettingsViewModel::getOptionDescription("demuxer-max-bytes"));
   connect(demuxerMaxBytesLineEdit, &QLineEdit::textChanged,
           m_viewModel->performanceCachingViewModel(),
           &PerformanceCachingViewModel::setDemuxerMaxBytes);
@@ -666,7 +669,7 @@ QWidget *SettingsView::createPerformanceTab() {
                            "dxva2", "videotoolbox", "none"});
   hwdecComboBox->setCurrentText(
       m_viewModel->performanceCachingViewModel()->hwdec());
-  hwdecComboBox->setToolTip(m_viewModel->getOptionDescription("hwdec"));
+  hwdecComboBox->setToolTip(SettingsViewModel::getOptionDescription("hwdec"));
   connect(hwdecComboBox, &QComboBox::currentTextChanged,
           m_viewModel->performanceCachingViewModel(),
           &PerformanceCachingViewModel::setHwdec);
@@ -683,7 +686,7 @@ QWidget *SettingsView::createPerformanceTab() {
   auto *hwdecCodecsLineEdit = new QLineEdit(
       m_viewModel->performanceCachingViewModel()->hwdecCodecs(), this);
   hwdecCodecsLineEdit->setToolTip(
-      m_viewModel->getOptionDescription("hwdec-codecs"));
+      SettingsViewModel::getOptionDescription("hwdec-codecs"));
   connect(hwdecCodecsLineEdit, &QLineEdit::textChanged,
           m_viewModel->performanceCachingViewModel(),
           &PerformanceCachingViewModel::setHwdecCodecs);
@@ -697,7 +700,7 @@ QWidget *SettingsView::createPerformanceTab() {
   return performanceTab;
 }
 
-QWidget *SettingsView::createInterfaceTab() {
+auto SettingsView::createInterfaceTab() -> QWidget * {
   auto *interfaceTab = new QWidget(m_tabWidget);
   auto *interfaceLayout = new QVBoxLayout(interfaceTab);
 
@@ -707,7 +710,7 @@ QWidget *SettingsView::createInterfaceTab() {
   auto *osdLevelSpinBox = new QSpinBox(this);
   osdLevelSpinBox->setRange(0, MPVDeck::Constants::MAX_OSD_LEVEL);
   osdLevelSpinBox->setValue(m_viewModel->interfaceOsdViewModel()->osdLevel());
-  osdLevelSpinBox->setToolTip(m_viewModel->getOptionDescription("osd-level"));
+  osdLevelSpinBox->setToolTip(SettingsViewModel::getOptionDescription("osd-level"));
   connect(osdLevelSpinBox,
           static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
           m_viewModel->interfaceOsdViewModel(),
@@ -723,11 +726,11 @@ QWidget *SettingsView::createInterfaceTab() {
   auto *osdFontSizeLayout = new QHBoxLayout();
   auto *osdFontSizeLabel = new QLabel("OSD Font Size:", this);
   auto *osdFontSizeSpinBox = new QSpinBox(this);
-  osdFontSizeSpinBox->setRange(0, 100); // Example range
+  osdFontSizeSpinBox->setRange(0, MPVDeck::Constants::MAX_OSD_FONT_SIZE); // Example range
   osdFontSizeSpinBox->setValue(
       m_viewModel->interfaceOsdViewModel()->osdFontSize());
   osdFontSizeSpinBox->setToolTip(
-      m_viewModel->getOptionDescription("osd-font-size"));
+      SettingsViewModel::getOptionDescription("osd-font-size"));
   connect(osdFontSizeSpinBox,
           static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
           m_viewModel->interfaceOsdViewModel(),
@@ -743,11 +746,11 @@ QWidget *SettingsView::createInterfaceTab() {
   auto *osdDurationLayout = new QHBoxLayout();
   auto *osdDurationLabel = new QLabel("OSD Duration (ms):", this);
   auto *osdDurationSpinBox = new QSpinBox(this);
-  osdDurationSpinBox->setRange(0, 10000); // Example range
+  osdDurationSpinBox->setRange(0, MPVDeck::Constants::MAX_OSD_DURATION); // Example range
   osdDurationSpinBox->setValue(
       m_viewModel->interfaceOsdViewModel()->osdDuration());
   osdDurationSpinBox->setToolTip(
-      m_viewModel->getOptionDescription("osd-duration"));
+      SettingsViewModel::getOptionDescription("osd-duration"));
   connect(osdDurationSpinBox,
           static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
           m_viewModel->interfaceOsdViewModel(),
@@ -762,7 +765,7 @@ QWidget *SettingsView::createInterfaceTab() {
   // On-Screen Controller (osc) checkbox
   auto *oscCheckBox = new QCheckBox("On-Screen Controller", this);
   oscCheckBox->setChecked(m_viewModel->interfaceOsdViewModel()->osc());
-  oscCheckBox->setToolTip(m_viewModel->getOptionDescription("osc"));
+  oscCheckBox->setToolTip(SettingsViewModel::getOptionDescription("osc"));
   connect(oscCheckBox, &QCheckBox::toggled,
           m_viewModel->interfaceOsdViewModel(), &InterfaceOsdViewModel::setOsc);
   connect(m_viewModel->interfaceOsdViewModel(),
@@ -778,7 +781,7 @@ QWidget *SettingsView::createInterfaceTab() {
   screenshotFormatComboBox->setCurrentText(
       m_viewModel->interfaceOsdViewModel()->screenshotFormat());
   screenshotFormatComboBox->setToolTip(
-      m_viewModel->getOptionDescription("screenshot-format"));
+      SettingsViewModel::getOptionDescription("screenshot-format"));
   connect(screenshotFormatComboBox, &QComboBox::currentTextChanged,
           m_viewModel->interfaceOsdViewModel(),
           &InterfaceOsdViewModel::setScreenshotFormat);
@@ -795,7 +798,7 @@ QWidget *SettingsView::createInterfaceTab() {
   auto *screenshotDirectoryLineEdit = new QLineEdit(
       m_viewModel->interfaceOsdViewModel()->screenshotDirectory(), this);
   screenshotDirectoryLineEdit->setToolTip(
-      m_viewModel->getOptionDescription("screenshot-directory"));
+      SettingsViewModel::getOptionDescription("screenshot-directory"));
   connect(screenshotDirectoryLineEdit, &QLineEdit::textChanged,
           m_viewModel->interfaceOsdViewModel(),
           &InterfaceOsdViewModel::setScreenshotDirectory);
@@ -812,7 +815,7 @@ QWidget *SettingsView::createInterfaceTab() {
   auto *screenshotTemplateLineEdit = new QLineEdit(
       m_viewModel->interfaceOsdViewModel()->screenshotTemplate(), this);
   screenshotTemplateLineEdit->setToolTip(
-      m_viewModel->getOptionDescription("screenshot-template"));
+      SettingsViewModel::getOptionDescription("screenshot-template"));
   connect(screenshotTemplateLineEdit, &QLineEdit::textChanged,
           m_viewModel->interfaceOsdViewModel(),
           &InterfaceOsdViewModel::setScreenshotTemplate);
@@ -826,7 +829,7 @@ QWidget *SettingsView::createInterfaceTab() {
   return interfaceTab;
 }
 
-QWidget *SettingsView::createRawConfigTab() {
+auto SettingsView::createRawConfigTab() -> QWidget * {
   auto *tab = new QWidget(m_tabWidget);
   auto *layout = new QVBoxLayout(tab);
 
@@ -848,7 +851,7 @@ QWidget *SettingsView::createRawConfigTab() {
       "directly");
 
   // Syntax highlighting (basic)
-  QFont font("Monospace", 9);
+  QFont font("Monospace", MPVDeck::Constants::DEFAULT_FONT_SIZE);
   m_rawConfigEditor->setFont(font);
 
   layout->addLayout(buttonLayout);
@@ -856,12 +859,12 @@ QWidget *SettingsView::createRawConfigTab() {
 
   // Connect signals
   connect(refreshBtn, &QPushButton::clicked,
-          [this]() { refreshRawEditor(m_rawConfigEditor); });
+          [this]() -> void { refreshRawEditor(m_rawConfigEditor); });
 
   connect(applyBtn, &QPushButton::clicked,
-          [this]() { applyRawConfig(m_rawConfigEditor->toPlainText()); });
+          [this]() -> void { applyRawConfig(m_rawConfigEditor->toPlainText()); });
 
-  connect(exportBtn, &QPushButton::clicked, [this]() {
+  connect(exportBtn, &QPushButton::clicked, [this]() -> void {
     QString fileName = QFileDialog::getSaveFileName(
         this, tr("Export mpv.conf"), "mpv.conf",
         tr("MPV Configuration Files (*.conf);;All Files (*)"));
@@ -948,48 +951,69 @@ void SettingsView::filterTabs(const QString &searchText) {
 }
 
 // Helper function to recursively search for text in widgets
-bool SettingsView::searchWidgets(QWidget *parentWidget,
-                                 const QString &searchText) {
+auto SettingsView::searchWidgets(QWidget *parentWidget,
+                                 const QString &searchText) -> bool {
   if (parentWidget == nullptr) {
     return false;
   }
 
-  // Check if the parent widget itself contains the text
-  // This handles QLabels, QCheckBoxes, QPushButtons, QLineEdits, QComboBoxes
-  if (auto *label = qobject_cast<QLabel *>(parentWidget)) {
-    if (label->text().contains(searchText, Qt::CaseInsensitive))
-      return true;
-  } else if (auto *checkBox = qobject_cast<QCheckBox *>(parentWidget)) {
-    if (checkBox->text().contains(searchText, Qt::CaseInsensitive))
-      return true;
-  } else if (auto *pushButton = qobject_cast<QPushButton *>(parentWidget)) {
-    if (pushButton->text().contains(searchText, Qt::CaseInsensitive))
-      return true;
-  } else if (auto *lineEdit = qobject_cast<QLineEdit *>(parentWidget)) {
-    if (lineEdit->text().contains(searchText, Qt::CaseInsensitive))
-      return true;
-    if (lineEdit->placeholderText().contains(searchText, Qt::CaseInsensitive))
-      return true;
-  } else if (auto *comboBox = qobject_cast<QComboBox *>(parentWidget)) {
-    if (comboBox->currentText().contains(searchText, Qt::CaseInsensitive))
-      return true;
-    for (int i = 0; i < comboBox->count(); ++i) {
-      if (comboBox->itemText(i).contains(searchText, Qt::CaseInsensitive))
-        return true;
-    }
-  }
-  // Also check tooltips for all widgets
-  if (parentWidget->toolTip().contains(searchText, Qt::CaseInsensitive)) {
+  if (SettingsView::widgetContainsText(parentWidget, searchText)) {
     return true;
   }
 
   // Recursively search in child widgets
-  for (QObject *child : parentWidget->children()) {
-    if (auto *childWidget = qobject_cast<QWidget *>(child)) {
-      if (searchWidgets(childWidget, searchText)) {
-        return true;
-      }
+  if (std::ranges::any_of(parentWidget->children(), [&](QObject *child) -> bool {
+        if (auto *childWidget = qobject_cast<QWidget *>(child)) {
+          return searchWidgets(childWidget, searchText);
+        }
+        return false;
+      })) {
+    return true;
+  }
+  return false;
+}
+
+auto SettingsView::widgetContainsText(QWidget *widget, const QString &searchText) -> bool {
+  if (widget == nullptr) {
+    return false;
+  }
+
+  // Check if the widget itself contains the text
+  if (auto *label = qobject_cast<QLabel *>(widget)) {
+    if (label->text().contains(searchText, Qt::CaseInsensitive)) {
+      return true;
     }
+  } else if (auto *checkBox = qobject_cast<QCheckBox *>(widget)) {
+    if (checkBox->text().contains(searchText, Qt::CaseInsensitive)) {
+      return true;
+    }
+  } else if (auto *pushButton = qobject_cast<QPushButton *>(widget)) {
+    if (pushButton->text().contains(searchText, Qt::CaseInsensitive)) {
+      return true;
+    }
+  } else if (auto *lineEdit = qobject_cast<QLineEdit *>(widget)) {
+    if (lineEdit->text().contains(searchText, Qt::CaseInsensitive)) {
+      return true;
+    }
+    if (lineEdit->placeholderText().contains(searchText, Qt::CaseInsensitive)) {
+      return true;
+    }
+  } else if (auto *comboBox = qobject_cast<QComboBox *>(widget)) {
+    if (comboBox->currentText().contains(searchText, Qt::CaseInsensitive)) {
+      return true;
+    }
+    if (std::ranges::any_of(
+            std::views::iota(0, comboBox->count()),
+            [&](int index) -> bool {
+              return comboBox->itemText(index).contains(searchText,
+                                                    Qt::CaseInsensitive);
+            })) {
+      return true;
+    }
+  }
+  // Also check tooltips for all widgets
+  if (widget->toolTip().contains(searchText, Qt::CaseInsensitive)) {
+    return true;
   }
   return false;
 }

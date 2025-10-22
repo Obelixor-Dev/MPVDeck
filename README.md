@@ -1,3 +1,4 @@
+
 # MPVDeck
 
 MPVDeck is a user-friendly C++ Qt6 GUI application designed for configuring the `mpv` video player. It aims to provide a graphical interface for managing various `mpv` settings, making it easier for users to customize their playback experience.
