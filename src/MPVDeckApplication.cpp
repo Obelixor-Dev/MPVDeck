@@ -3,21 +3,29 @@
 #include "viewmodels/SettingsViewModel.h"
 #include "views/SettingsView.h"
 #include <QDebug>
+#include <QGuiApplication>
 #include <QIcon>
+#include <QLoggingCategory> // New include
 #include <QMessageBox>
+#include <QScreen>
 #include <QSettings>
 
-const int DEFAULT_WINDOW_WIDTH = 800;
+Q_LOGGING_CATEGORY(lcMPVDeckApplication,
+                   "mpvdeck.application") // New logging category
+
+const int DEFAULT_WINDOW_WIDTH  = 800;
 const int DEFAULT_WINDOW_HEIGHT = 600;
 
 // Custom message handler to redirect Qt logs to the console
-void messageHandler(QtMsgType type, const QMessageLogContext &context,
-                    const QString &msg) {
-  QByteArray localMsg = msg.toLocal8Bit();
-  const char *file = context.file != nullptr ? context.file : "unknown";
-  const char *function =
+void messageHandler(QtMsgType type, const QMessageLogContext& context,
+                    const QString& msg)
+{
+  QByteArray  localMsg = msg.toLocal8Bit();
+  const char* file     = context.file != nullptr ? context.file : "unknown";
+  const char* function =
       context.function != nullptr ? context.function : "unknown";
-  switch (type) {
+  switch(type)
+  {
   case QtDebugMsg:
     qDebug().noquote() << "Debug:" << localMsg.constData() << "(" << file << ":"
                        << context.line << "," << function << ")";
@@ -37,12 +45,12 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context,
   case QtFatalMsg:
     qFatal().noquote() << "Fatal:" << localMsg.constData() << "(" << file << ":"
                        << context.line << "," << function << ")";
-    abort();
   }
 }
 
-MPVDeckApplication::MPVDeckApplication(int &argc, char **argv)
-    : QApplication(argc, argv) {
+MPVDeckApplication::MPVDeckApplication(int& argc, char** argv)
+    : QApplication(argc, argv)
+{
   // Set application and organization name for QSettings
   QCoreApplication::setOrganizationName("MPVDeck");
   QCoreApplication::setApplicationName("MPVDeck");
@@ -55,55 +63,95 @@ MPVDeckApplication::MPVDeckApplication(int &argc, char **argv)
 
 MPVDeckApplication::~MPVDeckApplication() = default;
 
-void MPVDeckApplication::setupMessageHandlers() {
+void MPVDeckApplication::setupMessageHandlers()
+{
   qInstallMessageHandler(messageHandler);
-  qDebug() << "Setting up message handlers...";
+  qCDebug(lcMPVDeckApplication) << "Setting up message handlers...";
 }
 
-void MPVDeckApplication::setupConfigAndUI() {
-  qDebug() << "Setting up config and UI...";
+void MPVDeckApplication::setupConfigAndUI()
+{
+  qCDebug(lcMPVDeckApplication) << "Setting up config and UI...";
 
   m_configManager = std::make_unique<ConfigManager>();
   m_settingsViewModel =
       std::make_unique<SettingsViewModel>(m_configManager.get());
   m_settingsViewModel->loadSettings();
 
-  qDebug() << "AudioVM:" << m_settingsViewModel->audioViewModel();
-  qDebug() << "VideoVM:" << m_settingsViewModel->videoViewModel();
-  qDebug() << "PerformanceVM:"
-           << m_settingsViewModel->performanceCachingViewModel();
-  qDebug() << "SubtitleVM:" << m_settingsViewModel->subtitleViewModel();
-  qDebug() << "PlaybackBehaviorVM:"
-           << m_settingsViewModel->playbackBehaviorViewModel();
-  qDebug() << "InterfaceOsdVM:" << m_settingsViewModel->interfaceOsdViewModel();
+  qCDebug(lcMPVDeckApplication)
+      << "AudioVM:" << m_settingsViewModel->audioViewModel();
+  qCDebug(lcMPVDeckApplication)
+      << "VideoVM:" << m_settingsViewModel->videoViewModel();
+  qCDebug(lcMPVDeckApplication)
+      << "PerformanceVM:" << m_settingsViewModel->performanceCachingViewModel();
+  qCDebug(lcMPVDeckApplication)
+      << "SubtitleVM:" << m_settingsViewModel->subtitleViewModel();
+  qCDebug(lcMPVDeckApplication)
+      << "PlaybackBehaviorVM:"
+      << m_settingsViewModel->playbackBehaviorViewModel();
+  qCDebug(lcMPVDeckApplication)
+      << "InterfaceOsdVM:" << m_settingsViewModel->interfaceOsdViewModel();
 
   m_settingsView = std::make_unique<SettingsView>(m_settingsViewModel.get());
   m_settingsView->setWindowTitle("MPVDeck");
 
   // Check if config file exists, if not, prompt to create default
-  if (!m_configManager->configFileExists()) {
+  if(!m_configManager->configFileExists())
+  {
     QMessageBox::StandardButton reply = QMessageBox::question(
         nullptr, "MPVDeck",
         "No mpv.conf found. Would you like to create a default one?",
         QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
-      m_settingsViewModel->loadDefaults();
+    if(reply == QMessageBox::Yes)
+    {
+      m_settingsViewModel->defaultsLoader()->loadDefaults();
       m_settingsViewModel->saveSettings();
       QMessageBox::information(nullptr, "MPVDeck", "Default mpv.conf created.");
     }
   }
 }
 
-void MPVDeckApplication::restoreWindowState() {
-  qDebug() << "Restoring window state...";
+void MPVDeckApplication::restoreWindowState()
+{
+  qCDebug(lcMPVDeckApplication) << "Restoring window state...";
   QSettings settings;
-  qDebug() << "QSettings file:" << settings.fileName();
-  m_settingsView->restoreGeometry(settings.value("geometry").toByteArray());
-  m_settingsView->restoreState(settings.value("windowState").toByteArray());
+  qCDebug(lcMPVDeckApplication) << "QSettings file:" << settings.fileName();
+
+  bool geometryRestored = false;
+  bool stateRestored    = false;
+
+  if(settings.contains("geometry"))
+  {
+    geometryRestored = m_settingsView->restoreGeometry(
+        settings.value("geometry").toByteArray());
+  }
+  if(settings.contains("windowState"))
+  {
+    stateRestored = m_settingsView->restoreState(
+        settings.value("windowState").toByteArray());
+  }
+
+  if(!geometryRestored || !stateRestored)
+  {
+    qCDebug(lcMPVDeckApplication) << "Window state or geometry not restored. "
+                                     "Using default size and centering.";
+    m_settingsView->resize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+
+    // Center the window
+    QScreen* screen = QGuiApplication::primaryScreen();
+    if(screen)
+    {
+      QRect screenGeometry = screen->availableGeometry();
+      int   x = (screenGeometry.width() - m_settingsView->width()) / 2;
+      int   y = (screenGeometry.height() - m_settingsView->height()) / 2;
+      m_settingsView->move(x, y);
+    }
+  }
   m_settingsView->show();
 }
 
-auto MPVDeckApplication::run() -> int {
+auto MPVDeckApplication::run() -> int
+{
   MPVDeckApplication::setupMessageHandlers();
   setupConfigAndUI();
   restoreWindowState();

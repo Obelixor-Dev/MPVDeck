@@ -15,13 +15,18 @@ Thank you for your interest in contributing to MPVDeck! We welcome contributions
 
 This project uses `clang-format` to maintain a consistent code style. Please ensure your contributions are formatted using `clang-format` before submitting a pull request.
 
+### Running Code Quality Tools
+- Format code: `cmake --build build --target format`
+- Run static analysis: `cmake --build build --target clang-tidy-check`
+Ensure both pass before submitting a pull request.
+
 ## Code Quality
 
 This project uses `clang-tidy` for static analysis to enforce code quality and identify potential issues. When building the project with CMake, `clang-tidy` is automatically run with a specific set of checks. You can configure the checks via the `.clang-tidy` file.
 
-## Reporting Bugs
+## Submitting Contributions
 
-If you find a bug, please open an issue on the GitHub repository with a clear description of the problem, steps to reproduce it, and your environment details.
+All contributions must be licensed under the MIT License to ensure compatibility with the project. By submitting a pull request, you agree to license your work under the MIT License.
 
 ## Feature Requests
 

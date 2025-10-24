@@ -1,1 +1,22 @@
 BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++20
+ColumnLimit: 80
+IndentWidth: 2
+AccessModifierOffset: -2
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignOperands: true
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: Inline
+PointerAlignment: Left
+ReferenceAlignment: Left
+SpaceBeforeParens: Never
+SpaceAfterCStyleCast: true
+# Qt-specific: Avoid breaking after signal/slot keywords
+PenaltyBreakBeforeFirstCallParameter: 100
+# Ensure consistent spacing in Qt macros
+MacroBlockBegin: "^Q_OBJECT$"
+MacroBlockEnd: "^$"
+

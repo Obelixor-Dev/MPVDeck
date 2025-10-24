@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.mpvdeck.MPVDeck</id>
+  <name>MPVDeck</name>
+  <summary>User-friendly GUI for mpv configuration</summary>
+  <developer_name>Obelixor-Dev</developer_name>
+  <description>
+    <p>MPVDeck is a Qt6-based application for configuring the mpv video player. It provides a graphical interface to manage audio, video, subtitles, and other settings, with a raw config editor for advanced users.</p>
+  </description>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <content_rating type="oars-1.1" />
+  <categories>
+    <category>AudioVideo</category>
+    <category>Settings</category>
+  </categories>
+  <icon type="remote">https://github.com/Obelixor-Dev/mpvdeck/raw/main/resources/mcog.png</icon>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/Obelixor-Dev/mpvdeck/raw/main/screenshots/audio_tab.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Obelixor-Dev/mpvdeck/raw/main/screenshots/raw_editor.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="1.0.0" date="2025-10-24"/>
+  </releases>
+  <url type="homepage">https://github.com/Obelixor-Dev/mpvdeck</url>
+  <url type="bugtracker">https://github.com/Obelixor-Dev/mpvdeck/issues</url>
+</component>

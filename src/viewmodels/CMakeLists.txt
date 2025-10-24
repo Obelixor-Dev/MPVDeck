@@ -1,6 +1,10 @@
 add_library(MPVDeckViewModels STATIC
     SettingsViewModel.cpp
     SettingsViewModel.h
+    OptionBindings.cpp
+    OptionBindings.h
+    DefaultsLoader.cpp
+    DefaultsLoader.h
     AudioViewModel.cpp
     AudioViewModel.h
     VideoViewModel.cpp
@@ -20,5 +24,5 @@ target_include_directories(MPVDeckViewModels PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
-target_link_libraries(MPVDeckViewModels PRIVATE Qt6::Widgets MPVDeckCore)
+target_link_libraries(MPVDeckViewModels PRIVATE Qt6::Widgets MPVDeckCore MPVDeckUtils)
 target_compile_features(MPVDeckViewModels PRIVATE cxx_std_20)

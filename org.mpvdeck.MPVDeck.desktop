@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=MPVDeck
+Comment=A user-friendly C++ Qt6 GUI application for configuring the mpv video player.
+Exec=/app/bin/MPVDeck
+Icon=org.mpvdeck.MPVDeck
+Terminal=false
+StartupWMClass=MPVDeck
+Categories=AudioVideo;Player;Qt;

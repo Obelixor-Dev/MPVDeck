@@ -3,14 +3,20 @@
 
 #include <QString>
 
-namespace MPVDeck {
+namespace MPVDeck
+{
 
-struct ConfigResult {
-  bool success;
+struct ConfigResult
+{
+  bool    success;
   QString errorMessage;
 
-  static auto successResult() -> ConfigResult { return {.success = true, .errorMessage = ""}; }
-  static auto failureResult(const QString &message) -> ConfigResult {
+  static auto successResult() -> ConfigResult
+  {
+    return {.success = true, .errorMessage = ""};
+  }
+  static auto failureResult(const QString& message) -> ConfigResult
+  {
     return {.success = false, .errorMessage = message};
   }
 };

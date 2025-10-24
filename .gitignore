@@ -1,7 +1,9 @@
+
 # Build and IDE related files
 GEMINI.md
 .idea/
 build/
+build-dir/
 cmake-build-clang-tidy/
 cmake-build-debug/
 combined_project.txt

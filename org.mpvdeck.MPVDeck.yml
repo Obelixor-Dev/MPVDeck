@@ -1,0 +1,28 @@
+app-id: org.mpvdeck.MPVDeck
+runtime: org.kde.Platform
+runtime-version: '6.9'
+sdk: org.kde.Sdk
+command: MPVDeck
+finish-args:
+  - --share=network
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --share=ipc
+  - --device=dri
+modules:
+  - name: mpvdeck
+    buildsystem: cmake
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=/app
+    sources:
+      - type: dir
+        path: .
+    build-commands:
+      - cmake -B _build
+      - cmake --build _build -j$(nproc)
+      - cmake --install _build --prefix=/app
+      - install -Dm644 LICENSE /app/share/licenses/org.mpvdeck.MPVDeck/LICENSE
+      - install -Dm644 org.mpvdeck.MPVDeck.metainfo.xml /app/share/metainfo/org.mpvdeck.MPVDeck.metainfo.xml
+metadata:
+  license: MIT

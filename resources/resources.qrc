@@ -2,5 +2,6 @@
 <qresource>
     <file>defaults.json</file>
     <file>mcog.png</file>
+    <file>mpv_options_descriptions.json</file>
 </qresource>
 </RCC>
