@@ -87,8 +87,8 @@ auto AudioViewModel::audioDevices() -> QStringList
 
 auto AudioViewModel::audioChannelLayouts() -> QStringList
 {
-  return {"auto", "stereo", "mono", "2.1", "3.0", "3.1", "4.0", "4.1",
-          "5.0",  "5.1",    "6.0", "6.1", "7.0", "7.1", "downmix"};
+  return {"auto", "stereo", "2.1", "3.0", "3.1", "4.0", "4.1",
+          "5.0",  "5.1",    "6.0", "6.1", "7.0", "7.1"};
 }
 
 auto AudioViewModel::audioDelay() const -> double
