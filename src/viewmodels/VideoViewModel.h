@@ -61,6 +61,8 @@ class VideoViewModel : public QObject
     [[nodiscard]] static auto videoCscales() -> QStringList;
     [[nodiscard]] static auto videoDscales() -> QStringList;
     [[nodiscard]] static auto videoTscales() -> QStringList;
+    [[nodiscard]] static auto videoVoOptions() -> QStringList;
+    [[nodiscard]] static auto videoVideoSyncOptions() -> QStringList;
 
   signals:
     void videoVoChanged(const QString& videoVo);

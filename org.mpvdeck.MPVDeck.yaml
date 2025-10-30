@@ -17,8 +17,9 @@ modules:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCMAKE_INSTALL_PREFIX=/app
     sources:
-      - type: dir
-        path: .
+      - type: archive
+        url: https://github.com/Obelixor-Dev/MPVDeck/archive/refs/tags/v1.0.0.tar.gz
+        sha256: "1914e5c5ea364d3f0602893455dbafc27b38821137ffb698011b9faee06e72c7"
     build-commands:
       - cmake -B _build
       - cmake --build _build -j$(nproc)
