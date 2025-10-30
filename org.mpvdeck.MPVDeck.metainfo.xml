@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>org.mpvdeck.MPVDeck</id>
   <name>MPVDeck</name>
-  <summary>User-friendly GUI for mpv configuration</summary>
+  <summary>User-friendly configuration tool for mpv video player</summary>
   <developer_name>Obelixor-Dev</developer_name>
   <description>
     <p>MPVDeck is a Qt6-based application for configuring the mpv video player. It provides a graphical interface to manage audio, video, subtitles, and other settings, with a raw config editor for advanced users.</p>
