@@ -1,3 +1,5 @@
+set(CMAKE_AUTOMOC ON)
+
 add_library(MPVDeckViewModels STATIC
     SettingsViewModel.cpp
     SettingsViewModel.h

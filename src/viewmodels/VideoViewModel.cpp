@@ -186,3 +186,18 @@ auto VideoViewModel::videoTscales() -> QStringList
 {
   return {"oversample", "linear", "nearest"};
 }
+
+auto VideoViewModel::videoProfiles() -> QStringList
+{
+<<<<<<< Updated upstream
+  return {"gpu", "gpu-next", "x11", "xv", "opengl", "sdl"};
+}
+
+auto VideoViewModel::videoVideoSyncOptions() -> QStringList
+{
+  return {"display-resample", "audio", "video"};
+}
+=======
+  return {"gpu-hq", "gpu", "low-latency", "lavfi-complex", "default"};
+}
+>>>>>>> Stashed changes
