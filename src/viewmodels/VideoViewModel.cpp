@@ -13,6 +13,12 @@ auto VideoViewModel::videoVo() const -> const QString&
 
 void VideoViewModel::setVideoVo(const QString& videoVo)
 {
+  if(!videoVoOptions().contains(videoVo))
+  {
+    qCWarning(lcVideoViewModel)
+        << "Attempted to set invalid video output:" << videoVo;
+    return;
+  }
   if(m_videoVo != videoVo)
   {
     m_videoVo = videoVo;
@@ -141,6 +147,12 @@ auto VideoViewModel::videoVideoSync() const -> const QString&
 
 void VideoViewModel::setVideoVideoSync(const QString& videoVideoSync)
 {
+  if(!videoVideoSyncOptions().contains(videoVideoSync))
+  {
+    qCWarning(lcVideoViewModel)
+        << "Attempted to set invalid video sync:" << videoVideoSync;
+    return;
+  }
   if(m_videoVideoSync != videoVideoSync)
   {
     m_videoVideoSync = videoVideoSync;
@@ -187,9 +199,8 @@ auto VideoViewModel::videoTscales() -> QStringList
   return {"oversample", "linear", "nearest"};
 }
 
-auto VideoViewModel::videoProfiles() -> QStringList
+auto VideoViewModel::videoVoOptions() -> QStringList
 {
-<<<<<<< Updated upstream
   return {"gpu", "gpu-next", "x11", "xv", "opengl", "sdl"};
 }
 
@@ -197,7 +208,3 @@ auto VideoViewModel::videoVideoSyncOptions() -> QStringList
 {
   return {"display-resample", "audio", "video"};
 }
-=======
-  return {"gpu-hq", "gpu", "low-latency", "lavfi-complex", "default"};
-}
->>>>>>> Stashed changes
