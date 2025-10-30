@@ -9,6 +9,7 @@ finish-args:
   - --socket=wayland
   - --share=ipc
   - --device=dri
+  - --filesystem=xdg-config/mpv # Allows access to ~/.config/mpv. Verify if :create is needed.
 modules:
   - name: mpvdeck
     buildsystem: cmake
@@ -24,5 +25,6 @@ modules:
       - cmake --install _build --prefix=/app
       - install -Dm644 LICENSE /app/share/licenses/org.mpvdeck.MPVDeck/LICENSE
       - install -Dm644 org.mpvdeck.MPVDeck.metainfo.xml /app/share/metainfo/org.mpvdeck.MPVDeck.metainfo.xml
+      - install -Dm644 data/screenshots/*.png /app/share/appdata/
 metadata:
   license: MIT

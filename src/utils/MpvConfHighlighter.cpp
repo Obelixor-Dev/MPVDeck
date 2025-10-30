@@ -43,21 +43,22 @@ void MpvConfHighlighter::highlightBlock(const QString& text)
     while(i.hasNext())
     {
       QRegularExpressionMatch match = i.next();
-      setFormat(static_cast<int>(match.capturedStart()), static_cast<int>(match.capturedLength()), rule.format);
+      setFormat(static_cast<int>(match.capturedStart()),
+                static_cast<int>(match.capturedLength()), rule.format);
     }
   }
 
   // Highlight key-value pairs
-    QRegularExpression keyValueRx(R"(^\s*([^=\s]+)\s*=\s*(.*))");
-    QRegularExpressionMatch keyValueMatch = keyValueRx.match(text);
+  QRegularExpression      keyValueRx(R"(^\s*([^=\s]+)\s*=\s*(.*))");
+  QRegularExpressionMatch keyValueMatch = keyValueRx.match(text);
   if(keyValueMatch.hasMatch())
   {
     // Highlight key
-    setFormat(static_cast<int>(keyValueMatch.capturedStart(1)), static_cast<int>(keyValueMatch.capturedLength(1)),
-              keywordFormat);
+    setFormat(static_cast<int>(keyValueMatch.capturedStart(1)),
+              static_cast<int>(keyValueMatch.capturedLength(1)), keywordFormat);
     // Highlight value
-    setFormat(static_cast<int>(keyValueMatch.capturedStart(2)), static_cast<int>(keyValueMatch.capturedLength(2)),
-              valueFormat);
+    setFormat(static_cast<int>(keyValueMatch.capturedStart(2)),
+              static_cast<int>(keyValueMatch.capturedLength(2)), valueFormat);
   }
   else
   {
@@ -66,8 +67,8 @@ void MpvConfHighlighter::highlightBlock(const QString& text)
     QRegularExpressionMatch flagMatch = flagRx.match(text);
     if(flagMatch.hasMatch())
     {
-      setFormat(static_cast<int>(flagMatch.capturedStart(1)), static_cast<int>(flagMatch.capturedLength(1)),
-                keywordFormat);
+      setFormat(static_cast<int>(flagMatch.capturedStart(1)),
+                static_cast<int>(flagMatch.capturedLength(1)), keywordFormat);
     }
   }
 }

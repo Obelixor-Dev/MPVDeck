@@ -34,8 +34,6 @@ class SettingsView : public QMainWindow
     SettingsView(SettingsView&&)                 = delete;
     SettingsView& operator=(SettingsView&&)      = delete;
 
-
-
   private slots:
     auto onSaveButtonClicked() -> void;
     auto onSettingsSaved(const MPVDeck::ConfigResult& result) -> void;
@@ -48,7 +46,7 @@ class SettingsView : public QMainWindow
     void warningMessageDisplayed(const QString& message);
 
   private:
-    bool m_isTestMode = false;
+    bool   m_isTestMode = false;
     QMenu* m_fileMenu;
     auto   setupMenuBar() -> void;
 

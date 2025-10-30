@@ -64,7 +64,7 @@ private:
 
   // Private helper functions for saving config
   [[nodiscard]] auto validateConfigLines() const -> QStringList;
-  void updateConfigLines(QMap<QString, QString>& newSettings);
+  void               updateConfigLines(QMap<QString, QString>& newSettings);
   [[nodiscard]] auto writeConfigLines(const QString& tempConfigFilePath) const
       -> MPVDeck::ConfigResult;
 };

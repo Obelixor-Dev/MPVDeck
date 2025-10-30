@@ -9,7 +9,9 @@
   </description>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
-  <content_rating type="oars-1.1" />
+  <content_rating type="oars-1.1">
+    <value>None</value>
+  </content_rating>
   <categories>
     <category>AudioVideo</category>
     <category>Settings</category>
@@ -17,25 +19,25 @@
   <icon type="remote">https://github.com/Obelixor-Dev/mpvdeck/raw/main/resources/mcog.png</icon>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Obelixor-Dev/MPVDeck/main/screenshots/1-audio.png</image>
+      <image>file:///app/share/appdata/1-audio.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Obelixor-Dev/MPVDeck/main/screenshots/2-video.png</image>
+      <image>file:///app/share/appdata/2-video.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Obelixor-Dev/MPVDeck/main/screenshots/3-subtitles.png</image>
+      <image>file:///app/share/appdata/3-subtitles.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Obelixor-Dev/MPVDeck/main/screenshots/4-playback_behavior.png</image>
+      <image>file:///app/share/appdata/4-playback_behavior.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Obelixor-Dev/MPVDeck/main/screenshots/5-performance.png</image>
+      <image>file:///app/share/appdata/5-performance.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Obelixor-Dev/MPVDeck/main/screenshots/6-interface.png</image>
+      <image>file:///app/share/appdata/6-interface.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Obelixor-Dev/MPVDeck/main/screenshots/7-raw_config.png</image>
+      <image>file:///app/share/appdata/7-raw_config.png</image>
     </screenshot>
   </screenshots>
   <releases>

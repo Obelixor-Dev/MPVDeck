@@ -1,9 +1,9 @@
 #include "OptionBindings.h"
-#include "SettingsViewModel.h"
 #include "AudioViewModel.h"
 #include "InterfaceOsdViewModel.h"
 #include "PerformanceCachingViewModel.h"
 #include "PlaybackBehaviorViewModel.h"
+#include "SettingsViewModel.h"
 #include "SubtitleViewModel.h"
 #include "VideoViewModel.h"
 
@@ -743,7 +743,8 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
            return {};
          }
          return viewModel->interfaceOsdViewModel()->screenshotTemplate();
-       }},  };
+       }},
+  };
 }
 
 QList<OptionBinding>

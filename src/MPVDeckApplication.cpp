@@ -43,8 +43,8 @@ void messageHandler(QtMsgType type, const QMessageLogContext& context,
                           << ":" << context.line << "," << function << ")";
     break;
   case QtFatalMsg:
-    qCritical().noquote() << "Fatal:" << localMsg.constData() << "(" << file << ":"
-                       << context.line << "," << function << ")";
+    qCritical().noquote() << "Fatal:" << localMsg.constData() << "(" << file
+                          << ":" << context.line << "," << function << ")";
   }
 }
 
