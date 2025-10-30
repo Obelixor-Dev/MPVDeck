@@ -36,13 +36,13 @@ This checklist outlines the steps required to prepare and submit MPVDeck to Flat
 - [ ] **Fork Flathub Repository:**
     - [ ] Fork `https://github.com/flathub/flathub`.
 
-- [ ] **Create Manifest File in Fork:**
-    - [ ] In your forked repository, create `org.mpvdeck.MPVDeck.yaml` (note the `.yaml` extension) in the root directory.
-    - [ ] Copy your updated Flatpak manifest content into this new `.yaml` file.
+- [x] **Create Manifest File in Fork:**
+    - [x] In your forked repository, create `org.mpvdeck.MPVDeck.yaml` (note the `.yaml` extension) in the root directory.
+    - [x] Copy your updated Flatpak manifest content into this new `.yaml` file.
 
-- [ ] **Commit and Push Changes:**
-    - [ ] Commit the new manifest file to your forked repository.
-    - [ ] Push the changes to your GitHub fork.
+- [x] **Commit and Push Changes:**
+    - [x] Commit the new manifest file to your forked repository.
+    - [x] Push the changes to your GitHub fork.
 
 - [ ] **Open a Pull Request (PR) to Flathub:**
     - [ ] *Before opening the PR, ensure a release has been tagged on GitHub and a source tarball is available.*
