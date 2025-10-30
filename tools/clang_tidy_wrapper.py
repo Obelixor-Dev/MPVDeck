@@ -39,8 +39,11 @@ def main():
     # Filter unsupported flags from the command line
     filtered_args = filter_flags(sys.argv[1:])
 
+    # Add extra args to ignore unknown flags
+    extra_args = ['--extra-arg=-Wno-unknown-warning-option', '--extra-arg=-Wno-unknown-arguments']
+
     # Run clang-tidy with the cleaned-up arguments
-    result = subprocess.run([clang_tidy] + filtered_args)
+    result = subprocess.run([clang_tidy] + extra_args + filtered_args)
     sys.exit(result.returncode)
 
 if __name__ == "__main__":

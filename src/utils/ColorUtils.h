@@ -3,8 +3,9 @@
 
 #include <QString>
 
-namespace ColorUtils {
-    QString normalizeColor(const QString& colorInput);
+namespace ColorUtils
+{
+QString normalizeColor(const QString& colorInput);
 }
 
 #endif // MPVDECK_COLORUTILS_H

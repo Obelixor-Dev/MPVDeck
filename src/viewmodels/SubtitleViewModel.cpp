@@ -46,8 +46,10 @@ auto SubtitleViewModel::subtitleColor() const -> const QString&
 void SubtitleViewModel::setSubtitleColor(const QString& subtitleColor)
 {
   QString normalizedColor = ColorUtils::normalizeColor(subtitleColor);
-  if (normalizedColor.isEmpty()) {
-    emit errorOccurred("Invalid color format. Please use a valid hex, named, or rgb() color.");
+  if(normalizedColor.isEmpty())
+  {
+    emit errorOccurred(
+        "Invalid color format. Please use a valid hex, named, or rgb() color.");
     return;
   }
   if(m_subtitleColor != normalizedColor)

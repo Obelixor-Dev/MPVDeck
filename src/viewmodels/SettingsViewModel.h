@@ -57,8 +57,7 @@ class SettingsViewModel : public QObject
     static auto getOptionDescription(const QString& optionName) -> QString;
 
     [[nodiscard]] auto settings() const -> const QMap<QString, QString>&;
-    [[nodiscard]] auto audioViewModel() const
-        -> AudioViewModel*; // Getter for AudioViewModel
+    [[nodiscard]] auto audioViewModel() const-> AudioViewModel*; // Getter for AudioViewModel
     [[nodiscard]] auto videoViewModel() const
         -> VideoViewModel*; // Getter for VideoViewModel
     [[nodiscard]] auto subtitleViewModel() const

@@ -63,9 +63,9 @@ private:
   static auto serializeLine(const ConfigLine& line) -> QString;
 
   // Private helper functions for saving config
-  auto validateConfigLines() const -> QStringList;
+  [[nodiscard]] auto validateConfigLines() const -> QStringList;
   void updateConfigLines(QMap<QString, QString>& newSettings);
-  auto writeConfigLines(const QString& tempConfigFilePath) const
+  [[nodiscard]] auto writeConfigLines(const QString& tempConfigFilePath) const
       -> MPVDeck::ConfigResult;
 };
 

@@ -28,14 +28,13 @@ class SettingsView : public QMainWindow
       m_isTestMode = testMode;
     }
 
-  private:
-    bool m_isTestMode = false;
-
     // Explicitly delete copy and move constructors/assignment operators
     SettingsView(const SettingsView&)            = delete;
     SettingsView& operator=(const SettingsView&) = delete;
     SettingsView(SettingsView&&)                 = delete;
     SettingsView& operator=(SettingsView&&)      = delete;
+
+
 
   private slots:
     auto onSaveButtonClicked() -> void;
@@ -48,7 +47,8 @@ class SettingsView : public QMainWindow
   signals:
     void warningMessageDisplayed(const QString& message);
 
-  private: // NOLINT(readability-redundant-access-specifiers)
+  private:
+    bool m_isTestMode = false;
     QMenu* m_fileMenu;
     auto   setupMenuBar() -> void;
 

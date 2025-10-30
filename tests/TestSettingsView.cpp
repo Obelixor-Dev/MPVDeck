@@ -14,12 +14,8 @@ class TestSettingsView : public QObject
   Q_OBJECT
 
   public:
-    TestSettingsView()
-        : m_configManager(nullptr), m_settingsViewModel(nullptr),
-          m_settingsView(nullptr), m_tempDir(nullptr)
-    {
-    }
-    ~TestSettingsView() {}
+    TestSettingsView() = default;
+    ~TestSettingsView() = default;
 
   private slots:
     void init();
@@ -27,10 +23,10 @@ class TestSettingsView : public QObject
     void testInvalidSubtitleColorInput();
 
   private:
-    ConfigManager*     m_configManager;
-    SettingsViewModel* m_settingsViewModel;
-    SettingsView*      m_settingsView;
-    QTemporaryDir*     m_tempDir;
+    ConfigManager*     m_configManager{nullptr};
+    SettingsViewModel* m_settingsViewModel{nullptr};
+    SettingsView*      m_settingsView{nullptr};
+    QTemporaryDir*     m_tempDir{nullptr};
 };
 
 void TestSettingsView::init() // Used by Qt Test framework
@@ -75,10 +71,10 @@ void TestSettingsView::testInvalidSubtitleColorInput() // Used by Qt Test
 
   QCOMPARE(spy.count(),
            1); // Verify that the warning message was displayed once
-  QCOMPARE(
-      spy.at(0).at(0).toString(),
-      "Invalid color format. Please use a valid hex, named, or rgb() color."); // Verify the error
-                                                             // message
+  QCOMPARE(spy.at(0).at(0).toString(),
+           "Invalid color format. Please use a valid hex, named, or rgb() "
+           "color."); // Verify the error
+                      // message
 
   // Simulate typing a valid color
   spy.clear();                   // Clear previous signals

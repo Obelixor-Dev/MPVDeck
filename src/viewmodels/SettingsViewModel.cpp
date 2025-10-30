@@ -307,7 +307,7 @@ void SettingsViewModel::applyRawConfig(const QString& configText)
   loadSettings();
 
   MPVDeck::ConfigResult result;
-  result.success = true;
+  result.success      = true;
   result.errorMessage = "";
 
   emit settingsSaved(result);

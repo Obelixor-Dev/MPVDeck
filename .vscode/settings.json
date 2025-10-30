@@ -1,0 +1,12 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "files.associations": {
+        "*.cpp": "cpp"
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "C_Cpp.default.cppStandard": "c++20",
+    "editor.rulers": [
+        80
+    ]
+}

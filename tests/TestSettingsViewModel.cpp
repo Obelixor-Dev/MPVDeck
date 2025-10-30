@@ -19,12 +19,10 @@ class TestSettingsViewModel : public QObject
   Q_OBJECT
 
   public:
-    TestSettingsViewModel()
-        : m_configManager(nullptr), m_settingsViewModel(nullptr),
-          m_tempDir(nullptr)
-    {
-    }
-    ~TestSettingsViewModel() {}
+    TestSettingsViewModel() = default;
+    ~TestSettingsViewModel() = default;
+
+
 
   private slots:
     void init();
@@ -35,10 +33,10 @@ class TestSettingsViewModel : public QObject
     void testRoundTrip();
 
   private:
-    ConfigManager*     m_configManager;
-    SettingsViewModel* m_settingsViewModel;
+    ConfigManager*     m_configManager{nullptr};
+    SettingsViewModel* m_settingsViewModel{nullptr};
     QString            m_tempConfigPath;
-    QTemporaryDir*     m_tempDir;
+    QTemporaryDir*     m_tempDir{nullptr};
 };
 
 void TestSettingsViewModel::init() // Used by Qt Test framework

@@ -11,7 +11,7 @@ class TestDefaultsLoader : public QObject
   Q_OBJECT
 
   private slots:
-    void testLoadDefaults();
+    static void testLoadDefaults();
 };
 
 void TestDefaultsLoader::testLoadDefaults()

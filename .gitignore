@@ -1,12 +1,13 @@
-
 # Build and IDE related files
 GEMINI.md
 .idea/
 build/
 build-dir/
+build-debug/
+build-release/
 cmake-build-clang-tidy/
 cmake-build-debug/
 combined_project.txt
 cmake-build-release/
 docs-dev/
-.vscode/
+.cache

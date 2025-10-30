@@ -19,26 +19,28 @@ class TestConfigManager : public QObject
   Q_OBJECT
 
   public:
-    TestConfigManager() : m_tempDir(nullptr) {}
-    ~TestConfigManager() {}
+    TestConfigManager()  = default;
+    ~TestConfigManager() = default;
+
+
 
   private slots:
-    void initTestCase();
-    void testReadConfigFile_data();
-    void testReadConfigFile();
-    void testSaveConfigFile_data();
-    void testSaveConfigFile();
-    void testParseLine_data();
-    void testParseLine();
-    void testSerializeLine_data();
-    void testSerializeLine();
-    void testParseRawConfig_data();
-    void testParseRawConfig();
-    void cleanupTestCase();
+    void        initTestCase();
+    static void testReadConfigFile_data();
+    void        testReadConfigFile();
+    static void testSaveConfigFile_data();
+    void        testSaveConfigFile();
+    static void testParseLine_data();
+    void        testParseLine();
+    static void testSerializeLine_data();
+    void        testSerializeLine();
+    static void testParseRawConfig_data();
+    void        testParseRawConfig();
+    void        cleanupTestCase();
 
   private:
     QString        m_tempConfigPath;
-    QTemporaryDir* m_tempDir;
+    QTemporaryDir* m_tempDir{nullptr};
 
     void createTempConfigFile(const QString& content);
 };
@@ -96,25 +98,25 @@ void TestConfigManager::testParseLine_data()
       << "key=value with spaces" << ConfigManager::ConfigLineType::KeyValuePair
       << "key" << "value with spaces" << "" << "";
   QTest::newRow("key_quoted_value_with_spaces")
-      << "key=\"value with spaces\""
+      << R"(key="value with spaces")"
       << ConfigManager::ConfigLineType::KeyValuePair << "key"
       << "value with spaces" << "" << "";
-  QTest::newRow("key_quoted_value_with_comment_char")
-      << "key=\"value with # comment\""
+  QTest::newRow("key_quoted_value_with_comment")
+      << R"(key="value with # comment")"
       << ConfigManager::ConfigLineType::KeyValuePair << "key"
       << "value with # comment" << "" << "";
   QTest::newRow("key_quoted_value_with_escaped_quotes")
-      << "key=\"value with \\\"escaped quotes\\\"\""
+      << R"(key="value with \"escaped quotes\"")"
       << ConfigManager::ConfigLineType::KeyValuePair << "key"
       << "value with \"escaped quotes\"" << "" << "";
   QTest::newRow("key_quoted_value_with_backslashes")
-      << "key=\"value with \\\\backslashes\\\\\""
+      << R"(key="value with \\backslashes\\")"
       << ConfigManager::ConfigLineType::KeyValuePair << "key"
       << "value with \\backslashes\\" << "" << "";
   QTest::newRow("key_quoted_value_with_escaped_quotes_and_comment")
-      << "key=\"value with \\\"quotes\\\"\" # inline comment"
+      << R"(key="value with \"quotes\" # inline comment")"
       << ConfigManager::ConfigLineType::KeyValuePair << "key"
-      << "value with \"quotes\"" << "# inline comment" << "";
+      << "value with \"quotes\" # inline comment" << "" << "";
   QTest::newRow("key_value_with_inline_comment_chars")
       << "key=value with # comment # and another"
       << ConfigManager::ConfigLineType::KeyValuePair << "key" << "value with"
@@ -174,9 +176,7 @@ void TestConfigManager::testParseLine()
   QFETCH(QString, expectedTrailingComment);
   QFETCH(QString, expectedErrorMessage);
 
-  ConfigManager
-      configManager; // ConfigManager instance is needed to call parseLine
-  ConfigManager::ConfigLine actualLine = configManager.parseLine(line);
+  ConfigManager::ConfigLine actualLine = ConfigManager::parseLine(line);
 
   QCOMPARE(actualLine.type, expectedType);
   QCOMPARE(actualLine.key, expectedKey);
@@ -192,122 +192,76 @@ void TestConfigManager::testSerializeLine_data()
 
   // Key-Value Pairs
   QTest::newRow("key_value")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value",
-                                   "",
-                                   "",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value"}
       << "key=value";
   QTest::newRow("key_flag")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "",
-                                   "",
-                                   "",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key"}
       << "key=";
   QTest::newRow("key_value_with_spaces")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value with spaces",
-                                   "",
-                                   "",
-                                   ""}
-      << "key=\"value with spaces\"";
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value with spaces"}
+      << R"(key="value with spaces")";
   QTest::newRow("key_value_with_comment_char")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value with # comment",
-                                   "",
-                                   "",
-                                   ""}
-      << "key=\"value with # comment\"";
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value with # comment"}
+      << R"(key="value with # comment")";
   QTest::newRow("key_value_with_equals_sign")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value with = sign",
-                                   "",
-                                   "",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value with = sign"}
       << "key=\"value with = sign\"";
   QTest::newRow("key_value_with_quotes")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value with \"quotes\"",
-                                   "",
-                                   "",
-                                   ""}
-      << "key=\"value with \\\"quotes\\\"\"";
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value with \"quotes\""}
+      << R"(key="value with \"quotes\"")";
   QTest::newRow("key_value_with_backslashes")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value with \\backslashes\\",
-                                   "",
-                                   "",
-                                   ""}
-      << "key=\"value with \\\\backslashes\\\\\"";
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value with \\backslashes\\"}
+      << R"(key="value with \\backslashes\\")";
   QTest::newRow("key_value_with_trailing_comment")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value",
-                                   "",
-                                   "",
-                                   " # comment"}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value",
+                                   .trailingComment = " # comment"}
       << "key=value # comment";
   QTest::newRow("key_value_with_spaces_and_trailing_comment")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::KeyValuePair,
-                                   "key",
-                                   "value with spaces",
-                                   "",
-                                   "",
-                                   " # comment"}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::KeyValuePair,
+                                   .key = "key",
+                                   .value = "value with spaces",
+                                   .trailingComment = " # comment"}
       << "key=\"value with spaces\" # comment";
 
   // Comments
   QTest::newRow("comment_only")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::Comment,
-                                   "",
-                                   "",
-                                   "# a comment",
-                                   "",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::Comment,
+                                   .rawText = "# a comment"}
       << "# a comment";
   QTest::newRow("indented_comment")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::Comment,
-                                   "",
-                                   "",
-                                   "  # a comment",
-                                   "",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::Comment,
+                                   .rawText = "  # a comment"}
       << "  # a comment";
 
   // Empty Lines
   QTest::newRow("empty_line")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::EmptyLine,
-                                   "",
-                                   "",
-                                   "",
-                                   "",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::EmptyLine}
       << "";
   QTest::newRow("whitespace_only_line")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::EmptyLine,
-                                   "",
-                                   "",
-                                   "  ",
-                                   "",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::EmptyLine,
+                                   .rawText = "  "}
       << "  ";
 
   // Invalid Lines
   QTest::newRow("invalid_line_empty_key")
-      << ConfigManager::ConfigLine{ConfigManager::ConfigLineType::Invalid,
-                                   "",
-                                   "",
-                                   "=value",
-                                   "Key cannot be empty in a key-value pair.",
-                                   ""}
+      << ConfigManager::ConfigLine{.type = ConfigManager::ConfigLineType::Invalid,
+                                   .rawText = "=value",
+                                   .errorMessage = "Key cannot be empty in a key-value pair."}
       << "# ERROR: Key cannot be empty in a key-value pair. -- Original: "
          "=value";
 }
@@ -317,9 +271,7 @@ void TestConfigManager::testSerializeLine()
   QFETCH(ConfigManager::ConfigLine, line);
   QFETCH(QString, expectedLine);
 
-  ConfigManager
-      configManager; // ConfigManager instance is needed to call serializeLine
-  QString actualLine = configManager.serializeLine(line);
+  QString actualLine = ConfigManager::serializeLine(line);
 
   QCOMPARE(actualLine, expectedLine);
 }
@@ -434,14 +386,12 @@ void TestConfigManager::testReadConfigFile_data()
   ConfigMap settings11;
   settings11["path"] = "C:\\Program Files\\mpv";
   QTest::newRow("value_with_escaped_backslashes")
-      << "path=\"C:\\\\Program Files\\\\mpv\"\n"
-      << settings11;
+      << R"(path="C:\\Program Files\\mpv")" << settings11;
 
   ConfigMap settings12;
   settings12["title"] = "Movie with \"quotes\"";
   QTest::newRow("value_with_escaped_quotes")
-      << "title=\"Movie with \\\"quotes\\\"\"\n"
-      << settings12;
+      << R"(title="Movie with \"quotes\"")" << settings12;
 
   ConfigMap settings13;
   settings13["option"] = "value";

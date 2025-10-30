@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch (Debug)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/skum/Dev/CPP/MPVDeck/build-debug/bin/MPVDeck",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/skum/Dev/CPP/MPVDeck",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build (Debug)"
+        },
+        {
+            "name": "Launch (Release)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/skum/Dev/CPP/MPVDeck/build-release/bin/MPVDeck",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/skum/Dev/CPP/MPVDeck",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build (Release)"
+        }
+    ]
+}

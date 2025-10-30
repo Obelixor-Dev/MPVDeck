@@ -1,9 +1,9 @@
 #include "OptionBindings.h"
+#include "SettingsViewModel.h"
 #include "AudioViewModel.h"
 #include "InterfaceOsdViewModel.h"
 #include "PerformanceCachingViewModel.h"
 #include "PlaybackBehaviorViewModel.h"
-#include "SettingsViewModel.h"
 #include "SubtitleViewModel.h"
 #include "VideoViewModel.h"
 
@@ -15,7 +15,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "mute",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -23,9 +23,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->audioViewModel()->mute() ? QStringLiteral("yes")
                                                     : QStringLiteral("no");
@@ -33,7 +33,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "volume",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -41,16 +41,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return QString::number(viewModel->audioViewModel()->volume());
        }},
       {.key    = "audio-device",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -58,16 +58,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->audioViewModel()->audioDevice();
        }},
       {.key    = "audio-channels",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -75,16 +75,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->audioViewModel()->audioChannels();
        }},
       {.key    = "audio-delay",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -92,16 +92,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return QString::number(viewModel->audioViewModel()->audioDelay());
        }},
       {.key    = "audio-normalize-downmix",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -109,9 +109,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->audioViewModel()->audioNormalizeDownmix()
                     ? QStringLiteral("yes")
@@ -122,7 +122,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "profile",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -130,16 +130,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoProfile();
        }},
       {.key    = "scale",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -147,16 +147,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoScale();
        }},
       {.key    = "cscale",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -164,16 +164,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoCscale();
        }},
       {.key    = "dscale",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -181,16 +181,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoDscale();
        }},
       {.key    = "interpolation",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -198,9 +198,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoInterpolation()
                     ? QStringLiteral("yes")
@@ -209,7 +209,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "tscale",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -217,16 +217,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoTscale();
        }},
       {.key    = "video-sync",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -234,16 +234,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoVideoSync();
        }},
       {.key    = "deband",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -251,9 +251,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoDeband()
                     ? QStringLiteral("yes")
@@ -262,7 +262,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "vo",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -270,9 +270,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->videoViewModel()->videoVo();
        }},
@@ -281,7 +281,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "sub-visibility",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -289,9 +289,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->subtitleViewModel()->subtitleVisibility()
                     ? QStringLiteral("yes")
@@ -300,7 +300,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "sub-font-size",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -308,9 +308,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return QString::number(
              viewModel->subtitleViewModel()->subtitleFontSize());
@@ -318,7 +318,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "sub-color",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -326,16 +326,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->subtitleViewModel()->subtitleColor();
        }},
       {.key    = "slang",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -343,16 +343,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->subtitleViewModel()->subtitleLanguages();
        }},
       {.key    = "sub-auto",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -360,16 +360,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->subtitleViewModel()->subAuto();
        }},
       {.key    = "sid",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -377,16 +377,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->subtitleViewModel()->sid();
        }},
       {.key    = "sub-forced-only",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -394,9 +394,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->subtitleViewModel()->subForcedOnly()
                     ? QStringLiteral("yes")
@@ -405,7 +405,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "sub-font",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -413,9 +413,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->subtitleViewModel()->subFont();
        }},
@@ -424,7 +424,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "resume-playback",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -433,9 +433,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->playbackBehaviorViewModel()->resumePlayback()
                     ? QStringLiteral("yes")
@@ -444,7 +444,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "save-position-on-quit",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -453,9 +453,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->playbackBehaviorViewModel()->savePositionOnQuit()
                     ? QStringLiteral("yes")
@@ -464,7 +464,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "loop-file",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -472,16 +472,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->playbackBehaviorViewModel()->loopFile();
        }},
       {.key    = "keep-open",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -489,16 +489,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->playbackBehaviorViewModel()->keepOpen();
        }},
       {.key    = "autofit-larger",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -506,16 +506,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->playbackBehaviorViewModel()->autofitLarger();
        }},
       {.key    = "ytdl-raw-options",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -523,9 +523,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->playbackBehaviorViewModel()->ytdlRawOptions();
        }},
@@ -534,7 +534,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "cache",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -542,9 +542,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->performanceCachingViewModel()->cache()
                     ? QStringLiteral("yes")
@@ -553,7 +553,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "cache-secs",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -561,9 +561,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return QString::number(
              viewModel->performanceCachingViewModel()->cacheSecs());
@@ -571,7 +571,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "demuxer-max-bytes",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -579,16 +579,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->performanceCachingViewModel()->demuxerMaxBytes();
        }},
       {.key    = "hwdec",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -596,16 +596,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->performanceCachingViewModel()->hwdec();
        }},
       {.key    = "hwdec-codecs",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -613,9 +613,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->performanceCachingViewModel()->hwdecCodecs();
        }},
@@ -624,7 +624,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "osd-level",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -632,16 +632,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return QString::number(viewModel->interfaceOsdViewModel()->osdLevel());
        }},
       {.key    = "osd-font-size",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -649,9 +649,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return QString::number(
              viewModel->interfaceOsdViewModel()->osdFontSize());
@@ -659,7 +659,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "osd-duration",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -667,9 +667,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return QString::number(
              viewModel->interfaceOsdViewModel()->osdDuration());
@@ -677,7 +677,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "osc",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -685,9 +685,9 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->interfaceOsdViewModel()->osc()
                     ? QStringLiteral("yes")
@@ -696,7 +696,7 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
       {.key    = "screenshot-format",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -704,16 +704,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->interfaceOsdViewModel()->screenshotFormat();
        }},
       {.key    = "screenshot-directory",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -721,16 +721,16 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->interfaceOsdViewModel()->screenshotDirectory();
        }},
       {.key    = "screenshot-template",
        .setter = [viewModel](const QString& val) -> void
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
            return;
          }
@@ -738,13 +738,12 @@ OptionBindings::getAllBindings(QPointer<SettingsViewModel> viewModel)
        },
        .getter = [viewModel]() -> QString
        {
-         if(!viewModel)
+         if(viewModel.isNull())
          {
-           return QString();
+           return {};
          }
          return viewModel->interfaceOsdViewModel()->screenshotTemplate();
-       }},
-  };
+       }},  };
 }
 
 QList<OptionBinding>

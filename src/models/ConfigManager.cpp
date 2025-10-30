@@ -97,13 +97,13 @@ auto ConfigManager::parseLine(const QString& line) -> ConfigLine
 
   int  commentIndex = -1;
   bool inQuote      = false;
-  for(int i = 0; i < static_cast<int>(line.length()); ++i)
+  for(int i = 0; i < static_cast<int>(trimmedLine.length()); ++i)
   {
-    if(line.at(i) == '"' && (i == 0 || line.at(i - 1) != '\\'))
+    if(trimmedLine.at(i) == '"' && (i == 0 || trimmedLine.at(i - 1) != '\\'))
     {
       inQuote = !inQuote;
     }
-    else if(!inQuote && line.at(i) == '#')
+    else if(!inQuote && trimmedLine.at(i) == '#')
     {
       commentIndex = i;
       break;
@@ -113,15 +113,15 @@ auto ConfigManager::parseLine(const QString& line) -> ConfigLine
   QString effectiveLine;
   if(commentIndex != -1)
   {
-    configLine.trailingComment = line.mid(commentIndex);
-    effectiveLine              = line.left(commentIndex).trimmed();
+    configLine.trailingComment = trimmedLine.mid(commentIndex);
+    effectiveLine              = trimmedLine.left(commentIndex).trimmed();
   }
   else
   {
-    effectiveLine = line.trimmed();
+    effectiveLine = trimmedLine.trimmed();
   }
 
-  int separatorIndex = effectiveLine.indexOf('=');
+  int separatorIndex = static_cast<int>(effectiveLine.indexOf('='));
   if(separatorIndex != -1)
   {
     configLine.key = effectiveLine.left(separatorIndex).trimmed();
@@ -139,7 +139,7 @@ auto ConfigManager::parseLine(const QString& line) -> ConfigLine
       value = value.mid(1, qMax(0, static_cast<int>(value.length()) - 2));
       value = unescapeFromQuotes(value);
     }
-    configLine.value = value;
+    configLine.value = value.trimmed();
   }
   else
   {
@@ -349,7 +349,7 @@ auto ConfigManager::saveConfigFile(const QMap<QString, QString>& newSettings,
   if(!errors.isEmpty())
   {
     QString errorMessage =
-        "Cannot save configuration due to invalid lines:" + errors.join("\n");
+        "Cannot save configuration due to invalid lines:\n" + errors.join("\n");
     qCWarning(lcConfigManager) << errorMessage;
     return MPVDeck::ConfigResult::failureResult(errorMessage);
   }

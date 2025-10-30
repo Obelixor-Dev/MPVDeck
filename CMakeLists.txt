@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(MPVDeck VERSION 1.0.0 LANGUAGES CXX)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    string(REPLACE "-mno-direct-extern-access" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif()
+
 # Path to the wrapper script
 set(CLANG_TIDY_WRAPPER "${CMAKE_SOURCE_DIR}/tools/clang_tidy_wrapper.py")
 
@@ -11,8 +15,7 @@ if(CLANG_TIDY_BIN)
     message(STATUS "Enabling clang-tidy with wrapper: ${CLANG_TIDY_WRAPPER}")
     set(CMAKE_CXX_CLANG_TIDY
         "${CLANG_TIDY_WRAPPER}"
-        "--extra-arg=-Wno-unknown-warning-option"
-    )
+            )
 endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -34,7 +37,7 @@ enable_testing()
 
 find_program(CLANG_FORMAT_BIN NAMES clang-format)
 if(CLANG_FORMAT_BIN)
-    file(GLOB FORMAT_FILES
+    file(GLOB_RECURSE FORMAT_FILES
         "src/*.cpp"
         "src/*.h"
         "tests/*.cpp"
@@ -51,5 +54,20 @@ if(CLANG_TIDY_BIN)
         COMMAND ${CLANG_TIDY_WRAPPER} -p ${CMAKE_BINARY_DIR} ${FORMAT_FILES}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running clang-tidy on source files"
+    )
+endif()
+
+find_program(CPPCHECK_BIN NAMES cppcheck)
+if(CPPCHECK_BIN)
+    file(GLOB_RECURSE CPPCHECK_FILES
+        "src/*.cpp"
+        "src/*.h"
+        "tests/*.cpp"
+        "tests/*.h"
+    )
+    add_custom_target(cppcheck
+        COMMAND ${CPPCHECK_BIN} --enable=all --std=c++20 --language=c++ --platform=unix64 --library=qt --suppress=missingIncludeSystem ${CPPCHECK_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running cppcheck on source files"
     )
 endif()

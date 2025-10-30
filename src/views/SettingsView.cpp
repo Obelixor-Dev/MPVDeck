@@ -178,7 +178,7 @@ auto SettingsView::createAudioTab() -> QWidget*
 
   audioLayout->addWidget(ControlFactory::createComboBox(
       "Audio Device:", m_viewModel->audioViewModel()->audioDevice(),
-      m_viewModel->audioViewModel()->audioDevices(),
+      AudioViewModel::audioDevices(),
       SettingsViewModel::getOptionDescription("audio-device"),
       [this](const QString& value)
       { m_viewModel->audioViewModel()->setAudioDevice(value); },
@@ -223,7 +223,7 @@ auto SettingsView::createVideoTab() -> QWidget*
 
   videoLayout->addWidget(ControlFactory::createComboBox(
       "Profile:", m_viewModel->videoViewModel()->videoProfile(),
-      m_viewModel->videoViewModel()->videoProfiles(),
+      VideoViewModel::videoProfiles(),
       SettingsViewModel::getOptionDescription("profile"),
       [this](const QString& value)
       { m_viewModel->videoViewModel()->setVideoProfile(value); },
@@ -232,7 +232,7 @@ auto SettingsView::createVideoTab() -> QWidget*
 
   videoLayout->addWidget(ControlFactory::createComboBox(
       "Scale:", m_viewModel->videoViewModel()->videoScale(),
-      m_viewModel->videoViewModel()->videoScales(),
+      VideoViewModel::videoScales(),
       SettingsViewModel::getOptionDescription("scale"),
       [this](const QString& value)
       { m_viewModel->videoViewModel()->setVideoScale(value); },
@@ -257,7 +257,7 @@ auto SettingsView::createVideoTab() -> QWidget*
 
   videoLayout->addWidget(ControlFactory::createComboBox(
       "Chroma Upscaling:", m_viewModel->videoViewModel()->videoCscale(),
-      m_viewModel->videoViewModel()->videoCscales(),
+      VideoViewModel::videoCscales(),
       SettingsViewModel::getOptionDescription("cscale"),
       [this](const QString& value)
       { m_viewModel->videoViewModel()->setVideoCscale(value); },
@@ -266,7 +266,7 @@ auto SettingsView::createVideoTab() -> QWidget*
 
   videoLayout->addWidget(ControlFactory::createComboBox(
       "Downscaling:", m_viewModel->videoViewModel()->videoDscale(),
-      m_viewModel->videoViewModel()->videoDscales(),
+      VideoViewModel::videoDscales(),
       SettingsViewModel::getOptionDescription("dscale"),
       [this](const QString& value)
       { m_viewModel->videoViewModel()->setVideoDscale(value); },
@@ -283,7 +283,7 @@ auto SettingsView::createVideoTab() -> QWidget*
 
   videoLayout->addWidget(ControlFactory::createComboBox(
       "Temporal Scaling:", m_viewModel->videoViewModel()->videoTscale(),
-      m_viewModel->videoViewModel()->videoTscales(),
+      VideoViewModel::videoTscales(),
       SettingsViewModel::getOptionDescription("tscale"),
       [this](const QString& value)
       { m_viewModel->videoViewModel()->setVideoTscale(value); },
@@ -292,7 +292,7 @@ auto SettingsView::createVideoTab() -> QWidget*
 
   videoLayout->addWidget(ControlFactory::createComboBox(
       "Video Sync:", m_viewModel->videoViewModel()->videoVideoSync(),
-      m_viewModel->interfaceOsdViewModel()->videoSyncOptions(),
+      InterfaceOsdViewModel::videoSyncOptions(),
       SettingsViewModel::getOptionDescription("video-sync"),
       [this](const QString& value)
       { m_viewModel->videoViewModel()->setVideoVideoSync(value); },
@@ -334,8 +334,8 @@ auto SettingsView::createSubtitlesTab() -> QWidget*
   subColorLineEdit->setObjectName("subtitleColorLineEdit");
   subColorLineEdit->setToolTip(
       SettingsViewModel::getOptionDescription("sub-color"));
-  subColorLineEdit->setValidator(
-            nullptr);  auto* subColorButton = new QPushButton("Pick Color", subtitlesTab);
+  subColorLineEdit->setValidator(nullptr);
+  auto* subColorButton = new QPushButton("Pick Color", subtitlesTab);
   connect(subColorButton, &QPushButton::clicked,
           [this, subColorLineEdit]() -> void
           {
